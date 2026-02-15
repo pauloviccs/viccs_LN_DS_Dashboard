@@ -36,6 +36,9 @@ const HeroSequence = () => {
     const textBlur = useTransform(smoothProgress, [0.4, 0.6], [0, 20])
     const blurFilter = useTransform(textBlur, (v) => `blur(${v}px)`)
 
+    // Scroll Indicator Opacity - Moved to top level to avoid conditional hook call
+    const scrollIndicatorOpacity = useTransform(scrollYProgress, [0, 0.1], [1, 0])
+
     useEffect(() => {
         let loadedCount = 0
         const totalImages = images.length
@@ -155,7 +158,7 @@ const HeroSequence = () => {
                 {/* Scroll Indicator */}
                 {imagesLoaded && (
                     <motion.div
-                        style={{ opacity: useTransform(scrollYProgress, [0, 0.1], [1, 0]) }}
+                        style={{ opacity: scrollIndicatorOpacity }}
                         className="absolute bottom-10 left-1/2 -translate-x-1/2 text-white/50 text-sm animate-bounce"
                     >
                         Scroll to explore
