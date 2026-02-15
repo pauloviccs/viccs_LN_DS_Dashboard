@@ -31,7 +31,15 @@ const LoginView = () => {
             }
         } catch (error) {
             console.error("Auth error:", error)
-            alert(error.message)
+
+            let message = error.message
+            if (message.includes("Invalid login credentials")) {
+                message = "Invalid email or password. If you just signed up, please verify your email."
+            } else if (message.includes("Email not confirmed")) {
+                message = "Please confirm your email address before signing in."
+            }
+
+            alert(message)
         } finally {
             setLoading(false)
         }
