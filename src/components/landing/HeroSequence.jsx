@@ -1,5 +1,6 @@
 import { useRef, useEffect, useState } from 'react'
 import { useScroll, useTransform, motion, useSpring } from 'framer-motion'
+import { ChevronDown } from 'lucide-react'
 
 const frameCount = 80
 const images = []
@@ -115,7 +116,7 @@ const HeroSequence = () => {
     }, [imagesLoaded, frameIndex])
 
     return (
-        <div ref={containerRef} className="h-[400vh] relative">
+        <div ref={containerRef} className="h-[300vh] relative">
             {/* Loading Overlay */}
             {!imagesLoaded && (
                 <div className="fixed inset-0 z-50 bg-black flex flex-col items-center justify-center">
@@ -159,9 +160,15 @@ const HeroSequence = () => {
                 {imagesLoaded && (
                     <motion.div
                         style={{ opacity: scrollIndicatorOpacity }}
-                        className="absolute bottom-10 left-1/2 -translate-x-1/2 text-white/50 text-sm animate-bounce"
+                        className="absolute bottom-10 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2"
                     >
-                        Scroll to explore
+                        <span className="text-white/50 text-sm uppercase tracking-widest text-[10px]">Scroll to explore</span>
+                        <motion.div
+                            animate={{ y: [0, 10, 0] }}
+                            transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
+                        >
+                            <ChevronDown className="text-white/50 w-6 h-6" />
+                        </motion.div>
                     </motion.div>
                 )}
             </div>
