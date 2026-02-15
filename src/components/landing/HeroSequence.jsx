@@ -132,8 +132,8 @@ const HeroSequence = () => {
                 <div className="absolute inset-0 z-0">
                     {!loaded && (
                         <div className="absolute inset-0 flex flex-col items-center justify-center bg-black z-10 gap-4">
-                            <div className="text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-purple-400 mb-4">
-                                Lumia Network
+                            <div className="text-3xl font-luxury font-bold text-white mb-6 tracking-widest animate-pulse">
+                                LUMIA SYSTEM
                             </div>
                             <div className="w-64 h-1 bg-white/20 rounded-full overflow-hidden">
                                 <div
@@ -141,7 +141,7 @@ const HeroSequence = () => {
                                     style={{ width: `${loadProgress}%` }}
                                 />
                             </div>
-                            <p className="text-white/30 text-xs mt-2 font-mono">Loading Experience... {loadProgress}%</p>
+                            <p className="text-white/40 text-[10px] mt-4 font-luxury tracking-[0.3em] uppercase">Initializing Experience... {loadProgress}%</p>
                         </div>
                     )}
                     <canvas ref={canvasRef} className="block w-full h-full object-cover" />
@@ -158,15 +158,15 @@ const HeroSequence = () => {
                             initial={{ opacity: 0, y: 20 }}
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ duration: 0.8 }}
-                            className="text-6xl md:text-9xl font-bold text-white mb-4 tracking-tighter leading-none"
+                            className="text-6xl md:text-9xl font-luxury font-bold text-white mb-4 tracking-tighter leading-none"
                         >
-                            Lumia
+                            LUMIA
                         </motion.h1>
                         <motion.p
                             initial={{ opacity: 0, y: 20 }}
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ duration: 0.8, delay: 0.2 }}
-                            className="text-xl md:text-3xl text-white/80 font-light tracking-widest uppercase"
+                            className="text-xl md:text-3xl text-white/80 font-light tracking-[0.2em] uppercase font-luxury"
                         >
                             Digital Signage Solutions
                         </motion.p>

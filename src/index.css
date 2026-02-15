@@ -27,18 +27,40 @@
   --brand-danger: #FF453A;
   /* iOS Red */
 
-  /* Background Mesh */
-  --bg-mesh-1: #4F46E5;
-  --bg-mesh-2: #80ced6;
-  --bg-mesh-3: #ff00ff;
+  /* Background Mesh (Deep Void) */
+  --bg-mesh-1: #0A0A0A;
+  /* Near Black */
+  --bg-mesh-2: #1a1a2e;
+  /* Deep Blue Void */
+  --bg-mesh-3: #11001c;
+  /* Deep Purple Void */
+}
+
+.font-luxury {
+  font-family: var(--font-display);
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  /* Wide tracking */
+  font-weight: 600;
+}
+
+.text-reveal-mask {
+  overflow: hidden;
+  display: block;
+}
+
+.text-reveal-content {
+  display: block;
+  /* Animation will be handled by Framer Motion */
 }
 
 body {
   margin: 0;
   font-family: var(--font-body);
-  background: #0f0c29;
-  /* Fallback */
-  background: linear-gradient(to right, #24243e, #302b63, #0f0c29);
+  background: #050505;
+  /* Deep Void Base */
+  background: linear-gradient(to right, #050505, #0a0a0a, #050505);
+  /* Subtle Void Gradient */
   /* Deep Space */
   color: var(--text-primary);
   min-height: 100vh;

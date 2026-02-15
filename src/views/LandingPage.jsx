@@ -14,8 +14,8 @@ const Navbar = () => (
         transition={{ type: "spring", stiffness: 100, damping: 20 }}
         className="fixed top-6 left-1/2 -translate-x-1/2 w-[95%] max-w-7xl z-50 flex justify-between items-center px-8 py-4 rounded-2xl glass-navbar"
     >
-        <div className="text-2xl font-bold text-white animate-pulse">
-            Lumia Network
+        <div className="text-xl font-luxury font-bold text-white animate-pulse tracking-widest">
+            LUMIA NETWORK
         </div>
         <div className="hidden md:flex gap-8 text-sm font-medium text-white/70">
             {['About Us', 'Features', 'Pricing'].map((item) => (
@@ -39,14 +39,17 @@ const Navbar = () => (
 const Section = ({ id, title, children, className }) => (
     <section id={id} className={`min-h-screen py-24 px-8 flex flex-col justify-center ${className}`}>
         <div className="max-w-6xl mx-auto w-full">
-            <motion.h2
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                transition={{ type: "spring", stiffness: 100, damping: 20 }}
-                className="text-4xl md:text-5xl font-bold mb-12 bg-clip-text text-transparent bg-gradient-to-b from-white to-white/40"
-            >
-                {title}
-            </motion.h2>
+            <div className="text-reveal-mask mb-12">
+                <motion.h2
+                    initial={{ y: "100%" }}
+                    whileInView={{ y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }} // "Power4.out" feel
+                    className="text-4xl md:text-6xl font-luxury font-bold bg-clip-text text-transparent bg-gradient-to-b from-white to-white/40 leading-tight"
+                >
+                    {title}
+                </motion.h2>
+            </div>
             {children}
         </div>
     </section>
