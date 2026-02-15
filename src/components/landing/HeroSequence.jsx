@@ -23,6 +23,7 @@ const HeroSequence = () => {
     const scrollIndicatorOpacity = useTransform(scrollYProgress, [0, 0.1], [1, 0])
 
     useEffect(() => {
+        console.log("HeroSequence: Component Mounted")
         const loadedImages = new Array(FRAME_COUNT)
         let loadedCount = 0
 
@@ -30,6 +31,7 @@ const HeroSequence = () => {
         const firstImg = new Image()
         firstImg.src = `${IMAGES_BASE_PATH}000.jpg`
         firstImg.onload = () => {
+            console.log("HeroSequence: First frame loaded")
             loadedImages[0] = firstImg
             setImages([...loadedImages])
         }
@@ -46,6 +48,7 @@ const HeroSequence = () => {
                 setLoadProgress(Math.round((loadedCount / FRAME_COUNT) * 100))
 
                 if (loadedCount === FRAME_COUNT) {
+                    console.log("HeroSequence: All frames loaded")
                     setImages([...loadedImages])
                     setLoaded(true)
                 }
