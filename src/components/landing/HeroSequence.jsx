@@ -34,6 +34,7 @@ const HeroSequence = () => {
     const textScale = useTransform(smoothProgress, [0, 0.4, 0.6], [1, 1, 10])
     const textOpacity = useTransform(smoothProgress, [0, 0.4, 0.5], [1, 1, 0])
     const textBlur = useTransform(smoothProgress, [0.4, 0.6], [0, 20])
+    const blurFilter = useTransform(textBlur, (v) => `blur(${v}px)`)
 
     useEffect(() => {
         let loadedCount = 0
@@ -138,7 +139,7 @@ const HeroSequence = () => {
                         style={{
                             scale: textScale,
                             opacity: textOpacity,
-                            filter: useTransform(textBlur, (v) => `blur(${v}px)`),
+                            filter: blurFilter,
                             visibility: imagesLoaded ? 'visible' : 'hidden'
                         }}
                     >
