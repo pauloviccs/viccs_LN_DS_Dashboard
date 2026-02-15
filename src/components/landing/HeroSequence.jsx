@@ -23,8 +23,15 @@ const HeroSequence = () => {
     })
 
     const frameIndex = useTransform(scrollYProgress, [0, 1], [0, FRAME_COUNT - 1])
-    const contentOpacity = useTransform(scrollYProgress, [0, 0.5], [1, 0])
-    const contentY = useTransform(scrollYProgress, [0, 0.5], [0, -50])
+
+    // Jesko Jets "Cinematic Exit" - Scale Up, Blur, Fade Out
+    const textScale = useTransform(scrollYProgress, [0, 0.4], [1, 1.3])
+    const textBlur = useTransform(scrollYProgress, [0, 0.4], ["blur(0px)", "blur(15px)"])
+    const textOpacity = useTransform(scrollYProgress, [0, 0.3], [1, 0])
+
+    // Slight Y movement to feel like it's lifting off
+    const textY = useTransform(scrollYProgress, [0, 0.4], [0, -100])
+
     const scrollIndicatorOpacity = useTransform(scrollYProgress, [0, 0.1], [1, 0])
 
     useEffect(() => {
@@ -150,8 +157,13 @@ const HeroSequence = () => {
 
                 {/* Content Overlay */}
                 <motion.div
-                    style={{ opacity: contentOpacity, y: contentY }}
-                    className="relative z-10 h-full flex flex-col items-center justify-center pointer-events-none"
+                    style={{
+                        opacity: textOpacity,
+                        scale: textScale,
+                        filter: textBlur,
+                        y: textY
+                    }}
+                    className="relative z-10 h-full flex flex-col items-center justify-center pointer-events-none origin-center"
                 >
                     <div className="text-center">
                         <motion.h1
