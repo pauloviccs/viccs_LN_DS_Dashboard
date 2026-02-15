@@ -14,7 +14,7 @@ const Navbar = () => (
         transition={{ type: "spring", stiffness: 100, damping: 20 }}
         className="fixed top-6 left-1/2 -translate-x-1/2 w-[95%] max-w-7xl z-50 flex justify-between items-center px-8 py-4 rounded-2xl glass-navbar"
     >
-        <div className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-purple-400 animate-pulse">
+        <div className="text-2xl font-bold text-white animate-pulse">
             Lumia Network
         </div>
         <div className="hidden md:flex gap-8 text-sm font-medium text-white/70">
