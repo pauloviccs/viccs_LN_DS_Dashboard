@@ -13,17 +13,20 @@
   --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.2);
   --glass-blur: 24px;
   --glass-saturation: 180%;
-  
+
   /* Text Colors */
   --text-primary: #ffffff;
   --text-secondary: rgba(255, 255, 255, 0.7);
   --text-muted: rgba(255, 255, 255, 0.5);
 
   /* Brand Colors (Lumia) */
-  --brand-primary: #0A84FF; /* iOS Blue */
-  --brand-success: #30D158; /* iOS Green */
-  --brand-danger: #FF453A;  /* iOS Red */
-  
+  --brand-primary: #0A84FF;
+  /* iOS Blue */
+  --brand-success: #30D158;
+  /* iOS Green */
+  --brand-danger: #FF453A;
+  /* iOS Red */
+
   /* Background Mesh */
   --bg-mesh-1: #4F46E5;
   --bg-mesh-2: #80ced6;
@@ -33,8 +36,10 @@
 body {
   margin: 0;
   font-family: var(--font-body);
-  background: #0f0c29;  /* Fallback */
-  background: linear-gradient(to right, #24243e, #302b63, #0f0c29); /* Deep Space */
+  background: #0f0c29;
+  /* Fallback */
+  background: linear-gradient(to right, #24243e, #302b63, #0f0c29);
+  /* Deep Space */
   color: var(--text-primary);
   min-height: 100vh;
   overflow-x: hidden;
@@ -52,10 +57,12 @@ body {
   backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturation));
   -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturation));
   border: 1px solid var(--glass-border);
-  border-top: 1px solid var(--glass-highlight); /* Specular Highlight */
-  box-shadow: 
+  border-top: 1px solid var(--glass-highlight);
+  /* Specular Highlight */
+  box-shadow:
     var(--glass-shadow),
-    inset 0 0 20px rgba(255, 255, 255, 0.02); /* Inner Glow */
+    inset 0 0 20px rgba(255, 255, 255, 0.02);
+  /* Inner Glow */
   transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
@@ -63,23 +70,53 @@ body {
   background: rgba(255, 255, 255, 0.06);
   border-color: rgba(255, 255, 255, 0.15);
   border-top-color: rgba(255, 255, 255, 0.3);
-  box-shadow: 
-    0 15px 40px rgba(0,0,0,0.3),
+  box-shadow:
+    0 15px 40px rgba(0, 0, 0, 0.3),
     inset 0 0 30px rgba(255, 255, 255, 0.05);
   transform: translateY(-2px) scale(1.005);
 }
 
+/* Navbar specific frost */
+.glass-navbar {
+  background: rgba(255, 255, 255, 0.08);
+  /* More visible "frost" surface */
+  backdrop-filter: blur(40px) saturate(200%);
+  /* Stronger blur & saturation */
+  -webkit-backdrop-filter: blur(40px) saturate(200%);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow:
+    0 10px 40px rgba(0, 0, 0, 0.3),
+    inset 0 0 20px rgba(255, 255, 255, 0.05);
+  transition: all 0.3s ease;
+}
+
 /* Animations */
 @keyframes mesh-drift {
-  0% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
+  0% {
+    background-position: 0% 50%;
+  }
+
+  50% {
+    background-position: 100% 50%;
+  }
+
+  100% {
+    background-position: 0% 50%;
+  }
 }
 
 @keyframes float {
-  0% { transform: translateY(0px); }
-  50% { transform: translateY(-10px); }
-  100% { transform: translateY(0px); }
+  0% {
+    transform: translateY(0px);
+  }
+
+  50% {
+    transform: translateY(-10px);
+  }
+
+  100% {
+    transform: translateY(0px);
+  }
 }
 
 .animate-float {
