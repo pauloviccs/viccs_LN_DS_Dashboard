@@ -6,10 +6,13 @@
   --font-body: "Inter", sans-serif;
 
   /* Glass Tokens */
-  --glass-surface: rgba(255, 255, 255, 0.05);
-  --glass-border: rgba(255, 255, 255, 0.1);
-  --glass-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
-  --glass-blur: 20px;
+  /* Glass Tokens (Liquid Glass 2.0) */
+  --glass-surface: rgba(255, 255, 255, 0.03);
+  --glass-border: rgba(255, 255, 255, 0.08);
+  --glass-highlight: rgba(255, 255, 255, 0.15);
+  --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.2);
+  --glass-blur: 24px;
+  --glass-saturation: 180%;
   
   /* Text Colors */
   --text-primary: #ffffff;
@@ -43,20 +46,42 @@ body {
   background: transparent;
 }
 
-/* Glass Utility Class */
-.glass {
+/* Liquid Glass Utility */
+.glass-panel {
   background: var(--glass-surface);
-  backdrop-filter: blur(var(--glass-blur));
-  -webkit-backdrop-filter: blur(var(--glass-blur));
+  backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturation));
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturation));
   border: 1px solid var(--glass-border);
-  box-shadow: var(--glass-shadow);
+  border-top: 1px solid var(--glass-highlight); /* Specular Highlight */
+  box-shadow: 
+    var(--glass-shadow),
+    inset 0 0 20px rgba(255, 255, 255, 0.02); /* Inner Glow */
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.glass-morphism {
-    background: rgba( 255, 255, 255, 0.05 );
-    box-shadow: 0 8px 32px 0 rgba( 31, 38, 135, 0.37 );
-    backdrop-filter: blur( 12px );
-    -webkit-backdrop-filter: blur( 12px );
-    border-radius: 10px;
-    border: 1px solid rgba( 255, 255, 255, 0.18 );
+.glass-panel:hover {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(255, 255, 255, 0.15);
+  border-top-color: rgba(255, 255, 255, 0.3);
+  box-shadow: 
+    0 15px 40px rgba(0,0,0,0.3),
+    inset 0 0 30px rgba(255, 255, 255, 0.05);
+  transform: translateY(-2px) scale(1.005);
+}
+
+/* Animations */
+@keyframes mesh-drift {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+@keyframes float {
+  0% { transform: translateY(0px); }
+  50% { transform: translateY(-10px); }
+  100% { transform: translateY(0px); }
+}
+
+.animate-float {
+  animation: float 6s ease-in-out infinite;
 }

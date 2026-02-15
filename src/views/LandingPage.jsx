@@ -3,24 +3,37 @@ import { motion } from 'framer-motion'
 import HeroSequence from '../components/landing/HeroSequence'
 import FluidBackground from '../components/ui/FluidBackground'
 import LiquidButton from '../components/ui/LiquidButton'
+import GlassCard from '../components/ui/GlassCard'
 import { Check } from 'lucide-react'
+import clsx from 'clsx'
 
 const Navbar = () => (
-    <nav className="fixed top-0 w-full z-50 flex justify-between items-center px-8 py-6 backdrop-blur-md bg-black/10 border-b border-white/5">
-        <div className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-purple-400">
+    <motion.nav
+        initial={{ y: -100 }}
+        animate={{ y: 0 }}
+        transition={{ type: "spring", stiffness: 100, damping: 20 }}
+        className="fixed top-6 left-1/2 -translate-x-1/2 w-[95%] max-w-7xl z-50 flex justify-between items-center px-8 py-4 rounded-2xl glass-panel"
+    >
+        <div className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-purple-400 animate-pulse">
             Lumia Network
         </div>
         <div className="hidden md:flex gap-8 text-sm font-medium text-white/70">
-            <a href="#about" className="hover:text-white transition-colors">About Us</a>
-            <a href="#features" className="hover:text-white transition-colors">Features</a>
-            <a href="#pricing" className="hover:text-white transition-colors">Pricing</a>
+            {['About Us', 'Features', 'Pricing'].map((item) => (
+                <a
+                    key={item}
+                    href={`#${item.toLowerCase().replace(' ', '')}`}
+                    className="hover:text-white transition-colors hover:scale-105 transform duration-200"
+                >
+                    {item}
+                </a>
+            ))}
         </div>
         <div className="flex gap-4">
             <Link to="/login">
                 <LiquidButton className="px-6 py-2 text-sm">Login / Sign Up</LiquidButton>
             </Link>
         </div>
-    </nav>
+    </motion.nav>
 )
 
 const Section = ({ id, title, children, className }) => (
@@ -29,7 +42,7 @@ const Section = ({ id, title, children, className }) => (
             <motion.h2
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
+                transition={{ type: "spring", stiffness: 100, damping: 20 }}
                 className="text-4xl md:text-5xl font-bold mb-12 bg-clip-text text-transparent bg-gradient-to-b from-white to-white/40"
             >
                 {title}
@@ -67,19 +80,20 @@ const LandingPage = () => {
                     <div className="grid md:grid-cols-3 gap-8">
                         {[
                             { name: 'Starter', price: '$0', features: ['1 Screen', 'Basic Media', 'Community Support'] },
-                            { name: 'Pro', price: '$29', features: ['10 Screens', '4K Video', 'Priority Support', 'Smart Playlists'] },
+                            { name: 'Pro', price: '$29', features: ['10 Screens', '4K Video', 'Priority Support', 'Smart Playlists'], highlight: true },
                             { name: 'Enterprise', price: 'Custom', features: ['Unlimited Screens', 'SLA', 'API Access', 'White Label'] }
                         ].map((plan, i) => (
-                            <motion.div
+                            <GlassCard
                                 key={plan.name}
-                                initial={{ opacity: 0, y: 20 }}
-                                whileInView={{ opacity: 1, y: 0 }}
+                                className={clsx(
+                                    "flex flex-col",
+                                    plan.highlight && "border-blue-500/30 bg-blue-500/5 shadow-[0_0_50px_rgba(59,130,246,0.1)]"
+                                )}
                                 transition={{ delay: i * 0.1 }}
-                                className="p-8 rounded-3xl bg-white/5 border border-white/10 hover:border-white/20 transition-colors relative overflow-hidden"
                             >
                                 <h3 className="text-2xl font-bold mb-2">{plan.name}</h3>
                                 <div className="text-4xl font-bold mb-6">{plan.price}<span className="text-sm font-normal text-white/40">/mo</span></div>
-                                <ul className="space-y-4 mb-8">
+                                <ul className="space-y-4 mb-8 flex-grow">
                                     {plan.features.map(f => (
                                         <li key={f} className="flex gap-3 text-sm text-white/70">
                                             <Check size={16} className="text-blue-400" /> {f}
@@ -87,7 +101,7 @@ const LandingPage = () => {
                                     ))}
                                 </ul>
                                 <LiquidButton className="w-full justify-center">Get Started</LiquidButton>
-                            </motion.div>
+                            </GlassCard>
                         ))}
                     </div>
                 </Section>
