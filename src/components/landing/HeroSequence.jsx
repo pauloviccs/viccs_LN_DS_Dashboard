@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { useScroll, useTransform, motion } from 'framer-motion'
+import { useScroll, useTransform, motion, useMotionValueEvent } from 'framer-motion'
 import { ChevronDown } from 'lucide-react'
 
 const FRAME_COUNT = 80
@@ -15,6 +15,11 @@ const HeroSequence = () => {
     const { scrollYProgress } = useScroll({
         target: containerRef,
         offset: ["start start", "end end"]
+    })
+
+    // Debug Scroll Progress
+    useMotionValueEvent(scrollYProgress, "change", (latest) => {
+        console.log("Scroll Progress:", latest)
     })
 
     const frameIndex = useTransform(scrollYProgress, [0, 1], [0, FRAME_COUNT - 1])
