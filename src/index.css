@@ -1,0 +1,62 @@
+@import "tailwindcss";
+
+:root {
+  /* Liquid Glass Design System - iOS 26 Inspired */
+  --font-display: "Montserrat", sans-serif;
+  --font-body: "Inter", sans-serif;
+
+  /* Glass Tokens */
+  --glass-surface: rgba(255, 255, 255, 0.05);
+  --glass-border: rgba(255, 255, 255, 0.1);
+  --glass-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+  --glass-blur: 20px;
+  
+  /* Text Colors */
+  --text-primary: #ffffff;
+  --text-secondary: rgba(255, 255, 255, 0.7);
+  --text-muted: rgba(255, 255, 255, 0.5);
+
+  /* Brand Colors (Lumia) */
+  --brand-primary: #0A84FF; /* iOS Blue */
+  --brand-success: #30D158; /* iOS Green */
+  --brand-danger: #FF453A;  /* iOS Red */
+  
+  /* Background Mesh */
+  --bg-mesh-1: #4F46E5;
+  --bg-mesh-2: #80ced6;
+  --bg-mesh-3: #ff00ff;
+}
+
+body {
+  margin: 0;
+  font-family: var(--font-body);
+  background: #0f0c29;  /* Fallback */
+  background: linear-gradient(to right, #24243e, #302b63, #0f0c29); /* Deep Space */
+  color: var(--text-primary);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* Scrollbar Hide */
+::-webkit-scrollbar {
+  width: 0px;
+  background: transparent;
+}
+
+/* Glass Utility Class */
+.glass {
+  background: var(--glass-surface);
+  backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur));
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--glass-shadow);
+}
+
+.glass-morphism {
+    background: rgba( 255, 255, 255, 0.05 );
+    box-shadow: 0 8px 32px 0 rgba( 31, 38, 135, 0.37 );
+    backdrop-filter: blur( 12px );
+    -webkit-backdrop-filter: blur( 12px );
+    border-radius: 10px;
+    border: 1px solid rgba( 255, 255, 255, 0.18 );
+}
