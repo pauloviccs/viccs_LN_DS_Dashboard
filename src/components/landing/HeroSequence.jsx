@@ -1,178 +1,185 @@
-import { useRef, useEffect, useState } from 'react'
-import { useScroll, useTransform, motion, useSpring } from 'framer-motion'
+import { useEffect, useRef, useState } from 'react'
+import { useScroll, useTransform, motion } from 'framer-motion'
 import { ChevronDown } from 'lucide-react'
 
-const frameCount = 80
-const images = []
-
-// Preload images path
-for (let i = 0; i < frameCount; i++) {
-    const src = `/hero/heroanimation/horizontal/0_${i.toString().padStart(3, '0')}.jpg`
-    images.push(src)
-}
+const FRAME_COUNT = 80
+const IMAGES_BASE_PATH = '/hero/heroanimation/horizontal/0_'
 
 const HeroSequence = () => {
     const containerRef = useRef(null)
     const canvasRef = useRef(null)
-    const [imagesLoaded, setImagesLoaded] = useState(false)
+    const [images, setImages] = useState([])
+    const [loaded, setLoaded] = useState(false)
     const [loadProgress, setLoadProgress] = useState(0)
-    const imageObjects = useRef([])
 
-    // Scroll Progress: 0 to 1 across the 400vh container
     const { scrollYProgress } = useScroll({
         target: containerRef,
         offset: ["start start", "end end"]
     })
 
-    // Smooth scroll for animation to prevent jitter
-    const smoothProgress = useSpring(scrollYProgress, { mass: 0.1, stiffness: 100, damping: 20 })
-
-    // Map scroll to frame index
-    const frameIndex = useTransform(smoothProgress, [0, 1], [0, frameCount - 1])
-
-    // Text Effects - "Fly through"
-    // Text appears at start, stays until 20%, then flies 'into' camera by 50%
-    const textScale = useTransform(smoothProgress, [0, 0.4, 0.6], [1, 1, 10])
-    const textOpacity = useTransform(smoothProgress, [0, 0.4, 0.5], [1, 1, 0])
-    const textBlur = useTransform(smoothProgress, [0.4, 0.6], [0, 20])
-    const blurFilter = useTransform(textBlur, (v) => `blur(${v}px)`)
-
-    // Scroll Indicator Opacity - Moved to top level to avoid conditional hook call
+    const frameIndex = useTransform(scrollYProgress, [0, 1], [0, FRAME_COUNT - 1])
+    const contentOpacity = useTransform(scrollYProgress, [0, 0.5], [1, 0])
+    const contentY = useTransform(scrollYProgress, [0, 0.5], [0, -50])
     const scrollIndicatorOpacity = useTransform(scrollYProgress, [0, 0.1], [1, 0])
 
     useEffect(() => {
+        const loadedImages = new Array(FRAME_COUNT)
         let loadedCount = 0
-        const totalImages = images.length
 
-        const loadImages = async () => {
-            const promises = images.map((src) => {
-                return new Promise((resolve, reject) => {
-                    const img = new Image()
-                    img.src = src
-                    img.onload = () => {
-                        loadedCount++
-                        setLoadProgress(Math.round((loadedCount / totalImages) * 100))
-                        resolve(img)
-                    }
-                    img.onerror = (e) => {
-                        console.error("Failed to load image", src, e)
-                        // Resolve anyway to avoid breaking the Promise.all
-                        resolve(null)
-                    }
-                })
-            })
-
-            try {
-                imageObjects.current = await Promise.all(promises)
-                setImagesLoaded(true)
-            } catch (err) {
-                console.error("Failed to load frames sequence", err)
-            }
+        // Load first frame immediately
+        const firstImg = new Image()
+        firstImg.src = `${IMAGES_BASE_PATH}000.jpg`
+        firstImg.onload = () => {
+            loadedImages[0] = firstImg
+            setImages([...loadedImages])
         }
 
-        loadImages()
+        // Load remaining frames
+        for (let i = 0; i < FRAME_COUNT; i++) {
+            const paddedIndex = i.toString().padStart(3, '0')
+            const img = new Image()
+            img.src = `${IMAGES_BASE_PATH}${paddedIndex}.jpg`
+
+            img.onload = () => {
+                loadedImages[i] = img
+                loadedCount++
+                setLoadProgress(Math.round((loadedCount / FRAME_COUNT) * 100))
+
+                if (loadedCount === FRAME_COUNT) {
+                    setImages([...loadedImages])
+                    setLoaded(true)
+                }
+            }
+            img.onerror = () => {
+                console.warn(`Failed to load frame ${i}`)
+                loadedCount++
+                if (loadedCount === FRAME_COUNT) {
+                    setImages([...loadedImages])
+                    setLoaded(true)
+                }
+            }
+        }
     }, [])
 
     useEffect(() => {
-        if (!imagesLoaded || !canvasRef.current) return
+        if (!canvasRef.current || images.length === 0) return
 
         const canvas = canvasRef.current
-        const context = canvas.getContext('2d', { alpha: false }) // Optimize for no alpha
+        const ctx = canvas.getContext('2d', { alpha: false })
+        if (!ctx) return
 
         const render = (index) => {
-            const img = imageObjects.current[Math.round(index)]
-            if (img) {
-                const hRatio = canvas.width / img.width
-                const vRatio = canvas.height / img.height
-                const ratio = Math.max(hRatio, vRatio)
-                const centerShift_x = (canvas.width - img.width * ratio) / 2
-                const centerShift_y = (canvas.height - img.height * ratio) / 2
+            // Fallback to first frame if current not fully loaded yet, or specific frame
+            const img = images[Math.round(index)] || images[0]
+            if (!img) return
 
-                context.clearRect(0, 0, canvas.width, canvas.height)
-                context.drawImage(img, 0, 0, img.width, img.height,
-                    centerShift_x, centerShift_y, img.width * ratio, img.height * ratio)
+            const canvasRatio = canvas.width / canvas.height
+            const imgRatio = img.width / img.height
+
+            let drawWidth, drawHeight, offsetX, offsetY
+
+            if (imgRatio > canvasRatio) {
+                drawHeight = canvas.height
+                drawWidth = img.width * (canvas.height / img.height)
+                offsetX = (canvas.width - drawWidth) / 2
+                offsetY = 0
+            } else {
+                drawWidth = canvas.width
+                drawHeight = img.height * (canvas.width / img.width)
+                offsetX = 0
+                offsetY = (canvas.height - drawHeight) / 2
             }
+
+            ctx.clearRect(0, 0, canvas.width, canvas.height)
+            ctx.drawImage(img, offsetX, offsetY, drawWidth, drawHeight)
         }
 
         const unsubscribe = frameIndex.on("change", (latest) => {
             requestAnimationFrame(() => render(latest))
         })
 
-        // Initial render
-        render(0)
-
         const handleResize = () => {
             canvas.width = window.innerWidth
             canvas.height = window.innerHeight
             render(frameIndex.get())
         }
+
         window.addEventListener('resize', handleResize)
         handleResize()
+
+        // Initial render try
+        render(frameIndex.get())
 
         return () => {
             unsubscribe()
             window.removeEventListener('resize', handleResize)
         }
-    }, [imagesLoaded, frameIndex])
+    }, [loaded, images, frameIndex])
 
     return (
-        <div ref={containerRef} className="h-[300vh] relative">
-            {/* Loading Overlay */}
-            {!imagesLoaded && (
-                <div className="fixed inset-0 z-50 bg-black flex flex-col items-center justify-center">
-                    <div className="text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-purple-400 mb-4">
-                        Lumia Network
-                    </div>
-                    <div className="w-64 h-1 bg-white/20 rounded-full overflow-hidden">
-                        <div
-                            className="h-full bg-blue-500 transition-all duration-300 ease-out"
-                            style={{ width: `${loadProgress}%` }}
-                        />
-                    </div>
-                    <p className="text-white/30 text-xs mt-2 font-mono">Loading Experience... {loadProgress}%</p>
+        <section ref={containerRef} className="h-[300vh] relative">
+            <div className="sticky top-0 h-screen w-full overflow-hidden bg-black">
+
+                {/* Canvas Background */}
+                <div className="absolute inset-0 z-0">
+                    {!loaded && (
+                        <div className="absolute inset-0 flex flex-col items-center justify-center bg-black z-10 gap-4">
+                            <div className="text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-purple-400 mb-4">
+                                Lumia Network
+                            </div>
+                            <div className="w-64 h-1 bg-white/20 rounded-full overflow-hidden">
+                                <div
+                                    className="h-full bg-blue-500 transition-all duration-300 ease-out"
+                                    style={{ width: `${loadProgress}%` }}
+                                />
+                            </div>
+                            <p className="text-white/30 text-xs mt-2 font-mono">Loading Experience... {loadProgress}%</p>
+                        </div>
+                    )}
+                    <canvas ref={canvasRef} className="block w-full h-full object-cover" />
+                    <div className="absolute inset-0 bg-black/40" />
                 </div>
-            )}
 
-            <div className="sticky top-0 h-screen w-full overflow-hidden">
-                <canvas ref={canvasRef} className="w-full h-full object-cover block" />
-
-                {/* Overlay Content with "Jesko Jets" style Fly-Through effect */}
-                <div className="absolute inset-0 flex items-center justify-center pointer-events-none perspective-[1000px]">
-                    <motion.div
-                        className="text-center origin-center will-change-transform"
-                        style={{
-                            scale: textScale,
-                            opacity: textOpacity,
-                            filter: blurFilter,
-                            visibility: imagesLoaded ? 'visible' : 'hidden'
-                        }}
-                    >
-                        <h1 className="text-6xl md:text-9xl font-bold text-white mb-4 tracking-tighter leading-none">
+                {/* Content Overlay */}
+                <motion.div
+                    style={{ opacity: contentOpacity, y: contentY }}
+                    className="relative z-10 h-full flex flex-col items-center justify-center pointer-events-none"
+                >
+                    <div className="text-center">
+                        <motion.h1
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ duration: 0.8 }}
+                            className="text-6xl md:text-9xl font-bold text-white mb-4 tracking-tighter leading-none"
+                        >
                             Lumia
-                        </h1>
-                        <p className="text-xl md:text-3xl text-white/80 font-light tracking-widest uppercase">
+                        </motion.h1>
+                        <motion.p
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ duration: 0.8, delay: 0.2 }}
+                            className="text-xl md:text-3xl text-white/80 font-light tracking-widest uppercase"
+                        >
                             Digital Signage Solutions
-                        </p>
-                    </motion.div>
-                </div>
+                        </motion.p>
+                    </div>
+                </motion.div>
 
                 {/* Scroll Indicator */}
-                {imagesLoaded && (
+                <motion.div
+                    style={{ opacity: scrollIndicatorOpacity }}
+                    className="absolute bottom-10 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 z-20"
+                >
+                    <span className="text-white/50 text-sm uppercase tracking-widest text-[10px]">Scroll to explore</span>
                     <motion.div
-                        style={{ opacity: scrollIndicatorOpacity }}
-                        className="absolute bottom-10 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2"
+                        animate={{ y: [0, 10, 0] }}
+                        transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
                     >
-                        <span className="text-white/50 text-sm uppercase tracking-widest text-[10px]">Scroll to explore</span>
-                        <motion.div
-                            animate={{ y: [0, 10, 0] }}
-                            transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
-                        >
-                            <ChevronDown className="text-white/50 w-6 h-6" />
-                        </motion.div>
+                        <ChevronDown className="text-white/50 w-6 h-6" />
                     </motion.div>
-                )}
+                </motion.div>
             </div>
-        </div>
+        </section>
     )
 }
 
