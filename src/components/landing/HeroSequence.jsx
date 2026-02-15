@@ -1,10 +1,10 @@
 import { useRef, useEffect, useState } from 'react'
-import { useScroll, useTransform, motion } from 'framer-motion'
+import { useScroll, useTransform, motion, useSpring } from 'framer-motion'
 
 const frameCount = 80
 const images = []
 
-// Preload images
+// Preload images path
 for (let i = 0; i < frameCount; i++) {
     const src = `/hero/heroanimation/horizontal/0_${i.toString().padStart(3, '0')}.jpg`
     images.push(src)
@@ -14,27 +14,46 @@ const HeroSequence = () => {
     const containerRef = useRef(null)
     const canvasRef = useRef(null)
     const [imagesLoaded, setImagesLoaded] = useState(false)
+    const [loadProgress, setLoadProgress] = useState(0)
     const imageObjects = useRef([])
 
+    // Scroll Progress: 0 to 1 across the 400vh container
     const { scrollYProgress } = useScroll({
         target: containerRef,
         offset: ["start start", "end end"]
     })
 
-    // Map scroll progress (0 to 1) to frame index (0 to 79)
-    const frameIndex = useTransform(scrollYProgress, [0, 1], [0, frameCount - 1])
+    // Smooth scroll for animation to prevent jitter
+    const smoothProgress = useSpring(scrollYProgress, { mass: 0.1, stiffness: 100, damping: 20 })
+
+    // Map scroll to frame index
+    const frameIndex = useTransform(smoothProgress, [0, 1], [0, frameCount - 1])
+
+    // Text Effects - "Fly through"
+    // Text appears at start, stays until 20%, then flies 'into' camera by 50%
+    const textScale = useTransform(smoothProgress, [0, 0.4, 0.6], [1, 1, 10])
+    const textOpacity = useTransform(smoothProgress, [0, 0.4, 0.5], [1, 1, 0])
+    const textBlur = useTransform(smoothProgress, [0.4, 0.6], [0, 20])
 
     useEffect(() => {
         let loadedCount = 0
+        const totalImages = images.length
 
-        // Load all images for performance
         const loadImages = async () => {
             const promises = images.map((src) => {
                 return new Promise((resolve, reject) => {
                     const img = new Image()
                     img.src = src
-                    img.onload = () => resolve(img)
-                    img.onerror = reject
+                    img.onload = () => {
+                        loadedCount++
+                        setLoadProgress(Math.round((loadedCount / totalImages) * 100))
+                        resolve(img)
+                    }
+                    img.onerror = (e) => {
+                        console.error("Failed to load image", src, e)
+                        // Resolve anyway to avoid breaking the Promise.all
+                        resolve(null)
+                    }
                 })
             })
 
@@ -42,7 +61,7 @@ const HeroSequence = () => {
                 imageObjects.current = await Promise.all(promises)
                 setImagesLoaded(true)
             } catch (err) {
-                console.error("Failed to load frames", err)
+                console.error("Failed to load frames sequence", err)
             }
         }
 
@@ -53,13 +72,11 @@ const HeroSequence = () => {
         if (!imagesLoaded || !canvasRef.current) return
 
         const canvas = canvasRef.current
-        const context = canvas.getContext('2d')
+        const context = canvas.getContext('2d', { alpha: false }) // Optimize for no alpha
 
-        // Render function
         const render = (index) => {
             const img = imageObjects.current[Math.round(index)]
             if (img) {
-                // Draw image "cover" style
                 const hRatio = canvas.width / img.width
                 const vRatio = canvas.height / img.height
                 const ratio = Math.max(hRatio, vRatio)
@@ -72,7 +89,6 @@ const HeroSequence = () => {
             }
         }
 
-        // Subscribe to scroll changes to re-render canvas
         const unsubscribe = frameIndex.on("change", (latest) => {
             requestAnimationFrame(() => render(latest))
         })
@@ -80,7 +96,6 @@ const HeroSequence = () => {
         // Initial render
         render(0)
 
-        // Resize handler
         const handleResize = () => {
             canvas.width = window.innerWidth
             canvas.height = window.innerHeight
@@ -95,27 +110,55 @@ const HeroSequence = () => {
         }
     }, [imagesLoaded, frameIndex])
 
+    // Loading Screen
+    if (!imagesLoaded) {
+        return (
+            <div className="h-screen w-full bg-black flex flex-col items-center justify-center z-50 fixed top-0 left-0">
+                <div className="text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-purple-400 mb-4">
+                    Lumia Network
+                </div>
+                <div className="w-64 h-1 bg-white/20 rounded-full overflow-hidden">
+                    <div
+                        className="h-full bg-blue-500 transition-all duration-300 ease-out"
+                        style={{ width: `${loadProgress}%` }}
+                    />
+                </div>
+                <p className="text-white/30 text-xs mt-2 font-mono">Loading Experience... {loadProgress}%</p>
+            </div>
+        )
+    }
+
     return (
-        <div ref={containerRef} className="h-[300vh] relative">
+        <div ref={containerRef} className="h-[400vh] relative">
             <div className="sticky top-0 h-screen w-full overflow-hidden">
                 <canvas ref={canvasRef} className="w-full h-full object-cover block" />
 
-                {/* Overlay Content */}
-                <div className="absolute inset-0 flex items-center justify-center bg-black/40 pointer-events-none">
+                {/* Overlay Content with "Jesko Jets" style Fly-Through effect */}
+                <div className="absolute inset-0 flex items-center justify-center pointer-events-none perspective-[1000px]">
                     <motion.div
-                        className="text-center"
-                        initial={{ opacity: 0, y: 50 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 1, delay: 0.5 }}
+                        className="text-center origin-center will-change-transform"
+                        style={{
+                            scale: textScale,
+                            opacity: textOpacity,
+                            filter: useTransform(textBlur, (v) => `blur(${v}px)`)
+                        }}
                     >
-                        <h1 className="text-6xl md:text-8xl font-bold text-white mb-4 tracking-tighter">
+                        <h1 className="text-6xl md:text-9xl font-bold text-white mb-4 tracking-tighter leading-none">
                             Lumia
                         </h1>
-                        <p className="text-xl md:text-2xl text-white/80 font-light">
-                            The Future of Digital Signage
+                        <p className="text-xl md:text-3xl text-white/80 font-light tracking-widest uppercase">
+                            Digital Signage Solutions
                         </p>
                     </motion.div>
                 </div>
+
+                {/* Scroll Indicator (Fades out as we scroll) */}
+                <motion.div
+                    style={{ opacity: useTransform(scrollYProgress, [0, 0.1], [1, 0]) }}
+                    className="absolute bottom-10 left-1/2 -translate-x-1/2 text-white/50 text-sm animate-bounce"
+                >
+                    Scroll to explore
+                </motion.div>
             </div>
         </div>
     )

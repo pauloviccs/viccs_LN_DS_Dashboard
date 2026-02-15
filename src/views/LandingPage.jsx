@@ -3,12 +3,12 @@ import { motion } from 'framer-motion'
 import HeroSequence from '../components/landing/HeroSequence'
 import FluidBackground from '../components/ui/FluidBackground'
 import LiquidButton from '../components/ui/LiquidButton'
-import { ArrowRight, Check } from 'lucide-react'
+import { Check } from 'lucide-react'
 
 const Navbar = () => (
     <nav className="fixed top-0 w-full z-50 flex justify-between items-center px-8 py-6 backdrop-blur-md bg-black/10 border-b border-white/5">
         <div className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-purple-400">
-            Lumia
+            Lumia Network
         </div>
         <div className="hidden md:flex gap-8 text-sm font-medium text-white/70">
             <a href="#about" className="hover:text-white transition-colors">About Us</a>
@@ -52,7 +52,7 @@ const LandingPage = () => {
                 <Section id="about" title="Redefining Screens">
                     <div className="grid md:grid-cols-2 gap-12 items-center">
                         <p className="text-xl text-white/70 leading-relaxed">
-                            Lumia isn't just a CMS. It's an intelligent operating system for your physical spaces.
+                            Lumia - Digital Signage Solutions isn't just a CMS. It's an intelligent operating system for your physical spaces.
                             We've stripped away the complexity of digital signage and replaced it with a fluid,
                             intuitive experience that feels like magic.
                         </p>
@@ -93,7 +93,7 @@ const LandingPage = () => {
                 </Section>
 
                 <footer className="py-12 text-center text-white/20 text-sm border-t border-white/5">
-                    © 2026 Lumia Digital Signage. All rights reserved.
+                    © 2026 Lumia Digital Signage Solutions. All rights reserved.
                 </footer>
             </div>
         </div>
