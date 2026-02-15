@@ -103,7 +103,7 @@ const HeroSequence = () => {
         }
 
         const unsubscribe = frameIndex.on("change", (latest) => {
-            requestAnimationFrame(() => render(latest))
+            render(latest)
         })
 
         const handleResize = () => {

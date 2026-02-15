@@ -41,7 +41,7 @@ const Section = ({ id, title, children, className }) => (
 
 const LandingPage = () => {
     return (
-        <div className="bg-black min-h-screen text-white overflow-x-hidden">
+        <div className="bg-black min-h-screen text-white">
             <FluidBackground className="fixed inset-0 z-0 opacity-30" />
             <Navbar />
 
