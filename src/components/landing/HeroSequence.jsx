@@ -110,26 +110,24 @@ const HeroSequence = () => {
         }
     }, [imagesLoaded, frameIndex])
 
-    // Loading Screen
-    if (!imagesLoaded) {
-        return (
-            <div className="h-screen w-full bg-black flex flex-col items-center justify-center z-50 fixed top-0 left-0">
-                <div className="text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-purple-400 mb-4">
-                    Lumia Network
-                </div>
-                <div className="w-64 h-1 bg-white/20 rounded-full overflow-hidden">
-                    <div
-                        className="h-full bg-blue-500 transition-all duration-300 ease-out"
-                        style={{ width: `${loadProgress}%` }}
-                    />
-                </div>
-                <p className="text-white/30 text-xs mt-2 font-mono">Loading Experience... {loadProgress}%</p>
-            </div>
-        )
-    }
-
     return (
         <div ref={containerRef} className="h-[400vh] relative">
+            {/* Loading Overlay */}
+            {!imagesLoaded && (
+                <div className="fixed inset-0 z-50 bg-black flex flex-col items-center justify-center">
+                    <div className="text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-purple-400 mb-4">
+                        Lumia Network
+                    </div>
+                    <div className="w-64 h-1 bg-white/20 rounded-full overflow-hidden">
+                        <div
+                            className="h-full bg-blue-500 transition-all duration-300 ease-out"
+                            style={{ width: `${loadProgress}%` }}
+                        />
+                    </div>
+                    <p className="text-white/30 text-xs mt-2 font-mono">Loading Experience... {loadProgress}%</p>
+                </div>
+            )}
+
             <div className="sticky top-0 h-screen w-full overflow-hidden">
                 <canvas ref={canvasRef} className="w-full h-full object-cover block" />
 
@@ -140,7 +138,8 @@ const HeroSequence = () => {
                         style={{
                             scale: textScale,
                             opacity: textOpacity,
-                            filter: useTransform(textBlur, (v) => `blur(${v}px)`)
+                            filter: useTransform(textBlur, (v) => `blur(${v}px)`),
+                            visibility: imagesLoaded ? 'visible' : 'hidden'
                         }}
                     >
                         <h1 className="text-6xl md:text-9xl font-bold text-white mb-4 tracking-tighter leading-none">
@@ -152,13 +151,15 @@ const HeroSequence = () => {
                     </motion.div>
                 </div>
 
-                {/* Scroll Indicator (Fades out as we scroll) */}
-                <motion.div
-                    style={{ opacity: useTransform(scrollYProgress, [0, 0.1], [1, 0]) }}
-                    className="absolute bottom-10 left-1/2 -translate-x-1/2 text-white/50 text-sm animate-bounce"
-                >
-                    Scroll to explore
-                </motion.div>
+                {/* Scroll Indicator */}
+                {imagesLoaded && (
+                    <motion.div
+                        style={{ opacity: useTransform(scrollYProgress, [0, 0.1], [1, 0]) }}
+                        className="absolute bottom-10 left-1/2 -translate-x-1/2 text-white/50 text-sm animate-bounce"
+                    >
+                        Scroll to explore
+                    </motion.div>
+                )}
             </div>
         </div>
     )
