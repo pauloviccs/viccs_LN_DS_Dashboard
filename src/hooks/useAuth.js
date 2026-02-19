@@ -53,19 +53,51 @@ export function useAuth() {
     }
 
     useEffect(() => {
-        // Check active session
-        supabase.auth.getSession().then(({ data: { session } }) => {
-            handleSession(session)
-        })
+        let mounted = true
 
-        // Listen for changes
+        // Check active session immediately and restore it
+        const restoreSession = async () => {
+            try {
+                const { data: { session }, error } = await supabase.auth.getSession()
+                
+                if (error) {
+                    console.error('useAuth: Error getting session:', error)
+                    if (mounted) {
+                        setUser(null)
+                        setRole(null)
+                        setLoading(false)
+                    }
+                    return
+                }
+
+                if (mounted) {
+                    await handleSession(session)
+                }
+            } catch (err) {
+                console.error('useAuth: Exception restoring session:', err)
+                if (mounted) {
+                    setUser(null)
+                    setRole(null)
+                    setLoading(false)
+                }
+            }
+        }
+
+        restoreSession()
+
+        // Listen for auth state changes (login, logout, token refresh, etc.)
         const {
             data: { subscription },
-        } = supabase.auth.onAuthStateChange((_event, session) => {
-            handleSession(session)
+        } = supabase.auth.onAuthStateChange(async (_event, session) => {
+            if (mounted) {
+                await handleSession(session)
+            }
         })
 
-        return () => subscription.unsubscribe()
+        return () => {
+            mounted = false
+            subscription.unsubscribe()
+        }
     }, [])
 
     return { user, role, loading }

@@ -13,6 +13,10 @@ const LoginView = () => {
     const [loading, setLoading] = useState(false)
     const [email, setEmail] = useState('')
     const [password, setPassword] = useState('')
+    // Restore remember me preference from localStorage, default to true
+    const [rememberMe, setRememberMe] = useState(() => {
+        return localStorage.getItem('lumia_remember_me') === 'true' || true
+    })
     const { setUser, setRole } = useStore()
 
     const handleAuth = async (e) => {
@@ -21,8 +25,22 @@ const LoginView = () => {
 
         try {
             if (isLogin) {
-                const { data, error } = await supabase.auth.signInWithPassword({ email, password })
+                const { data, error } = await supabase.auth.signInWithPassword({ 
+                    email, 
+                    password 
+                }, {
+                    // Persist session in localStorage (Supabase does this by default, but we ensure it)
+                    persistSession: rememberMe
+                })
                 if (error) throw error
+                
+                // Save remember me preference
+                if (rememberMe) {
+                    localStorage.setItem('lumia_remember_me', 'true')
+                } else {
+                    localStorage.removeItem('lumia_remember_me')
+                }
+                
                 // Role check will be handled by useAuth or subsequent query
             } else {
                 const { data, error } = await supabase.auth.signUp({ email, password })
@@ -99,6 +117,25 @@ const LoginView = () => {
                             required
                         />
                     </div>
+
+                    {/* Remember Me Checkbox */}
+                    {isLogin && (
+                        <div className="flex items-center gap-2">
+                            <input
+                                type="checkbox"
+                                id="rememberMe"
+                                checked={rememberMe}
+                                onChange={(e) => setRememberMe(e.target.checked)}
+                                className="w-4 h-4 rounded border-white/20 bg-white/5 text-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-offset-0 cursor-pointer"
+                            />
+                            <label 
+                                htmlFor="rememberMe" 
+                                className="text-sm text-white/60 cursor-pointer select-none hover:text-white/80 transition-colors"
+                            >
+                                Permanecer logado
+                            </label>
+                        </div>
+                    )}
 
                     <LiquidButton
                         className="w-full"

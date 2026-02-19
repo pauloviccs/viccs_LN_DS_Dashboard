@@ -13,6 +13,8 @@ const AdminLayout = () => {
         await supabase.auth.signOut()
         setUser(null)
         setRole(null)
+        // Clear remember me preference on manual logout
+        localStorage.removeItem('lumia_remember_me')
         navigate('/login')
     }
 
