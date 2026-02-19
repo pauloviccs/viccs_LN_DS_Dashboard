@@ -1,8 +1,15 @@
 @import "tailwindcss";
 
+@font-face {
+  font-family: 'LemonMilk';
+  src: url('/fonts/LEMONMILK-Bold.otf') format('opentype');
+  font-weight: bold;
+  font-style: normal;
+}
+
 :root {
   /* Liquid Glass Design System - iOS 26 Inspired */
-  --font-display: "Montserrat", sans-serif;
+  --font-display: "LemonMilk", sans-serif;
   --font-body: "Inter", sans-serif;
 
   /* Glass Tokens */
