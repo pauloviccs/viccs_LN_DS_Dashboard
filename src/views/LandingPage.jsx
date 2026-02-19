@@ -4,10 +4,56 @@ import HeroSequence from '../components/landing/HeroSequence'
 import FluidBackground from '../components/ui/FluidBackground'
 import LiquidButton from '../components/ui/LiquidButton'
 import GlassCard from '../components/ui/GlassCard'
-import { Check } from 'lucide-react'
+import { Check, LogOut, LayoutDashboard, User } from 'lucide-react'
 import clsx from 'clsx'
+import { useAuth } from '../hooks/useAuth'
+import useStore from '../stores/useStore'
+import { supabase } from '../lib/supabase'
+import { useState, useEffect } from 'react'
 
-const Navbar = () => (
+const Navbar = () => {
+    const { user, role, loading } = useAuth()
+    const { setUser, setRole } = useStore()
+    const [profile, setProfile] = useState(null)
+
+    useEffect(() => {
+        const fetchProfile = async () => {
+            if (!user) return
+            const { data } = await supabase
+                .from('profiles')
+                .select('username, avatar_url')
+                .eq('id', user.id)
+                .single()
+            setProfile(data)
+        }
+        if (user) fetchProfile()
+    }, [user])
+
+    const handleLogout = async () => {
+        await supabase.auth.signOut()
+        setUser(null)
+        setRole(null)
+        localStorage.removeItem('lumia_remember_me')
+        setProfile(null)
+    }
+
+    const getDashboardPath = () => {
+        if (role === 'admin') return '/admin'
+        if (role === 'editor') return '/editor'
+        return '/client'
+    }
+
+    const getUserDisplayName = () => {
+        if (profile?.username) return profile.username
+        if (user?.email) return user.email.split('@')[0]
+        return 'User'
+    }
+
+    const getUserAvatar = () => {
+        return profile?.avatar_url || user?.user_metadata?.avatar_url || null
+    }
+
+    return (
     <motion.nav
         initial={{ y: -100 }}
         animate={{ y: 0 }}
@@ -28,13 +74,48 @@ const Navbar = () => (
                 </a>
             ))}
         </div>
-        <div className="flex gap-4">
-            <Link to="/login">
-                <LiquidButton className="px-6 py-2 text-sm">Login / Sign Up</LiquidButton>
-            </Link>
+        <div className="flex gap-4 items-center">
+            {loading ? (
+                <div className="px-6 py-2 text-sm text-white/50 animate-pulse">Loading...</div>
+            ) : user ? (
+                <div className="flex items-center gap-3">
+                    <Link to={getDashboardPath()}>
+                        <LiquidButton className="px-4 py-2 text-sm flex items-center gap-2">
+                            <LayoutDashboard size={16} />
+                            Dashboard
+                        </LiquidButton>
+                    </Link>
+                    <div className="flex items-center gap-2 px-3 py-2 rounded-xl glass-panel border border-white/10">
+                        <div className="w-8 h-8 rounded-full overflow-hidden bg-gradient-to-tr from-blue-500/20 to-purple-500/20 border border-white/10 flex items-center justify-center">
+                            {getUserAvatar() ? (
+                                <img src={getUserAvatar()} alt="Avatar" className="w-full h-full object-cover" />
+                            ) : (
+                                <span className="text-xs font-bold text-white/60">
+                                    {getUserDisplayName()[0].toUpperCase()}
+                                </span>
+                            )}
+                        </div>
+                        <span className="text-sm text-white/80 font-medium hidden md:block">
+                            {getUserDisplayName()}
+                        </span>
+                        <button
+                            onClick={handleLogout}
+                            className="p-1.5 rounded-lg hover:bg-white/10 text-white/60 hover:text-white transition-colors"
+                            title="Logout"
+                        >
+                            <LogOut size={16} />
+                        </button>
+                    </div>
+                </div>
+            ) : (
+                <Link to="/login">
+                    <LiquidButton className="px-6 py-2 text-sm">Login / Sign Up</LiquidButton>
+                </Link>
+            )}
         </div>
     </motion.nav>
-)
+    )
+}
 
 const Section = ({ id, title, children, className }) => (
     <section id={id} className={`min-h-screen py-24 px-8 flex flex-col justify-center ${className}`}>
