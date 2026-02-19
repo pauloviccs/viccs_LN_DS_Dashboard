@@ -2,7 +2,7 @@
 
 ![Lumia Banner](https://images.unsplash.com/photo-1550751827-4bd374c3f58b?q=80&w=2070&auto=format&fit=crop)
 
-**Lumia Digital Signage** is a next-generation SaaS platform designed for seamless management of digital displays. Built with a focus on aesthetics and performance, it features a proprietary "Liquid Glass" UI inspired by iOS 26 design principles, offering a premium experience for both Administrators and Clients.
+**Lumia Digital Signage** is a next-generation SaaS platform designed for seamless management of digital displays. Built with a focus on aesthetics and performance, it features a proprietary "Liquid Glass" UI inspired by iOS 26 design principles, offering a premium experience for Administrators, Editors, and Clients.
 
 ---
 
@@ -19,13 +19,22 @@
 - **Media Manager:** Drag & drop upload for images and videos directly to cloud storage.
 - **Playlist Editor:** Intuitive visual editor with drag & drop reordering (`dnd-kit`).
 - **Screen Management:** Pair devices via code, monitor status (online/offline), and assign playlists remotely.
-- **Client & User Management:** RBAC (Role-Based Access Control) for granular permissions.
+- **Client & User Management:** RBAC (Role-Based Access Control) for granular permissions (`admin`, `editor`, `client`).
+
+### 🎨 Editor Dashboard (New)
+
+- **Dedicated Workflow:** Specialized interface for content creators and playlist managers.
+- **Advanced Analytics:** Real-time network activity charts, storage usage, and active screen metrics.
+- **System Health:** Visual indicators for OS health and service status.
+- **Recent Activity:** Quick view of recently updated screens and playlists.
 
 ### 📱 Client Dashboard
 
 - **Real-time Monitoring:** View status and currently playing content for assigned screens.
-- **Performance metrics:** Uptime tracking and network health.
-- **Simple Interface:** Streamlined view focused on what matters to the end-user.
+- **Dynamic Profile:**
+  - **Username Management:** Custom unique usernames.
+  - **Avatar:** Profile picture upload with cropping tool.
+- **Auto-Sync:** Changes made by admins/editors reflect instantly via Supabase Realtime.
 
 ---
 
@@ -36,7 +45,7 @@
 - **Icons:** Lucide React
 - **Backend:** Supabase (Auth, Postgres DB, Storage, Realtime)
 - **State Management:** Zustand
-- **Routing:** React Router DOM (with Protected Routes)
+- **Routing:** React Router DOM 7 (with Protected Routes)
 
 ---
 
