@@ -90,43 +90,124 @@ const DashboardView = () => {
                 storagePercent: storagePercent
             })
 
-            // 4. Simulate Chart Data (Since we don't have historical metrics table yet)
-            generateChartData(active)
+
 
         } catch (error) {
             console.error('Error fetching dashboard data:', error)
         }
     }
 
-    const generateChartData = (currentActive) => {
-        // Create random history for demo feel
-        const labels = []
-        const dataPoints = []
+    // Realtime Chart Logic
+    useEffect(() => {
+        // Initialize chart with empty data or current active count
         const now = new Date()
+        const initialLabels = []
+        const initialData = []
 
-        for (let i = 6; i >= 0; i--) {
-            const t = new Date(now.getTime() - (i * 1800000)) // 30 min intervals
-            labels.push(t.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }))
-            // Random fluctuation around current active
-            const val = Math.max(0, currentActive + Math.floor(Math.random() * 3) - 1)
-            dataPoints.push(val)
+        // Initialize timeline (last 5 minutes)
+        for (let i = 9; i >= 0; i--) {
+            const t = new Date(now.getTime() - (i * 30000)) // 30 sec intervals
+            initialLabels.push(t.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }))
+            initialData.push(stats.activeScreens) // Start flat
         }
 
         setChartData({
-            labels,
-            datasets: [
-                {
-                    label: 'Telas Online',
-                    data: dataPoints,
-                    borderColor: '#4ade80',
-                    backgroundColor: 'rgba(74, 222, 128, 0.1)',
-                    borderWidth: 3,
-                    fill: true,
-                    tension: 0.4
-                }
-            ]
+            labels: initialLabels,
+            datasets: [{
+                label: 'Telas Online',
+                data: initialData,
+                borderColor: '#4ade80',
+                backgroundColor: 'rgba(74, 222, 128, 0.1)',
+                borderWidth: 3,
+                fill: true,
+                tension: 0.4,
+                pointRadius: 0,
+                pointHoverRadius: 4
+            }]
         })
-    }
+
+        // Subscribe to Realtime Screen Changes
+        const subscription = supabase
+            .channel('public:screens')
+            .on('postgres_changes', { event: '*', schema: 'public', table: 'screens' }, (payload) => {
+                // Update stats immediately
+                fetchDashboardData() // Re-fetch totals
+
+                // Update Chart (Live Monitor Effect)
+                setChartData(prev => {
+                    const newLabels = [...prev.labels]
+                    const newData = [...prev.datasets[0].data]
+
+                    const t = new Date()
+                    newLabels.push(t.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }))
+
+                    // Simple heuristic: if update was 'ONLINE', increment? 
+                    // Actually easier to just append the NEW active count from fetchDashboardData (which is async so might lag slightly)
+                    // Better validation: payload.new.status
+
+                    let currentActive = newData[newData.length - 1]
+                    if (payload.eventType === 'UPDATE') {
+                        if (payload.old.status !== 'online' && payload.new.status === 'online') currentActive++
+                        if (payload.old.status === 'online' && payload.new.status !== 'online') currentActive--
+                    }
+
+                    newData.push(currentActive)
+
+                    // Keep window size fixed
+                    if (newLabels.length > 10) {
+                        newLabels.shift()
+                        newData.shift()
+                    }
+
+                    return {
+                        ...prev,
+                        labels: newLabels,
+                        datasets: [{
+                            ...prev.datasets[0],
+                            data: newData
+                        }]
+                    }
+                })
+            })
+            .subscribe()
+
+        return () => {
+            supabase.removeChannel(subscription)
+        }
+    }, []) // Run once on mount
+
+    // Regular "Heartbeat" for chart (to keep it moving even without events)
+    useEffect(() => {
+        const interval = setInterval(() => {
+            setChartData(prev => {
+                const newLabels = [...prev.labels]
+                const newData = [...prev.datasets[0].data]
+
+                const t = new Date()
+                newLabels.push(t.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }))
+
+                // Carry forward last known value
+                const lastValue = newData[newData.length - 1] || 0
+                newData.push(lastValue)
+
+                if (newLabels.length > 10) {
+                    newLabels.shift()
+                    newData.shift()
+                }
+
+                return {
+                    ...prev,
+                    labels: newLabels,
+                    datasets: [{
+                        ...prev.datasets[0],
+                        data: newData
+                    }]
+                }
+            })
+        }, 30000) // update chart every 30s to match timeline
+
+        return () => clearInterval(interval)
+    }, [])
 
     // Chart Options
     const options = {
@@ -206,7 +287,7 @@ const DashboardView = () => {
                                 <Activity className="text-blue-400" size={20} />
                                 Atividade da Rede
                             </h3>
-                            <p className="text-sm text-white/40">Monitoramento em tempo real (Mocked)</p>
+                            <p className="text-sm text-white/40">Monitoramento de Atividade (Live)</p>
                         </div>
                     </div>
                     <div className="h-[250px] w-full">
