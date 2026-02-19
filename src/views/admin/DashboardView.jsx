@@ -280,14 +280,40 @@ const DashboardView = () => {
 
             {/* Main Chart Section */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                <GlassCard className="lg:col-span-2 min-h-[350px] p-6">
-                    <div className="flex items-center justify-between mb-6">
+                <GlassCard className="lg:col-span-2 min-h-[350px] p-6 relative">
+                    <div className="flex flex-col md:flex-row items-start md:items-center justify-between mb-6 gap-4">
                         <div>
                             <h3 className="text-lg font-bold text-white flex items-center gap-2">
                                 <Activity className="text-blue-400" size={20} />
                                 Atividade da Rede
                             </h3>
-                            <p className="text-sm text-white/40">Monitoramento de Atividade (Live)</p>
+                            <p className="text-sm text-white/40">Status de players e requisições de mídia</p>
+                        </div>
+
+                        <div className="flex items-center gap-2 bg-black/30 rounded-lg p-1 border border-white/5">
+                            {['24h', '7d', '30d'].map(range => (
+                                <button
+                                    key={range}
+                                    onClick={() => setTimeRange(range)}
+                                    className={`px-3 py-1 rounded-md text-xs font-medium transition-all ${timeRange === range
+                                            ? 'bg-white/10 text-white shadow-sm'
+                                            : 'text-white/40 hover:text-white hover:bg-white/5'
+                                        }`}
+                                >
+                                    {range}
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+
+                    <div className="flex items-center gap-6 mb-4 text-xs font-medium">
+                        <div className="flex items-center gap-2">
+                            <div className="w-3 h-3 rounded-full border-2 border-[#4ade80] bg-[#4ade80]/10" />
+                            <span className="text-white/70">Telas Ativas (Online)</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                            <div className="w-3 h-3 rounded-full border-2 border-[#60a5fa] bg-[#60a5fa]/10" />
+                            <span className="text-white/70">Requisições (30s)</span>
                         </div>
                     </div>
                     <div className="h-[250px] w-full">
