@@ -38,6 +38,9 @@ const DashboardView = () => {
         storagePercent: 0
     })
 
+    // --- Advanced Chart State ---
+    const [timeRange, setTimeRange] = useState('24h') // '24h', '7d', '30d'
+
     // Recent Activity (Contextual Data)
     const [recentScreens, setRecentScreens] = useState([])
     const [chartData, setChartData] = useState({
@@ -296,8 +299,8 @@ const DashboardView = () => {
                                     key={range}
                                     onClick={() => setTimeRange(range)}
                                     className={`px-3 py-1 rounded-md text-xs font-medium transition-all ${timeRange === range
-                                            ? 'bg-white/10 text-white shadow-sm'
-                                            : 'text-white/40 hover:text-white hover:bg-white/5'
+                                        ? 'bg-white/10 text-white shadow-sm'
+                                        : 'text-white/40 hover:text-white hover:bg-white/5'
                                         }`}
                                 >
                                     {range}
