@@ -7,13 +7,20 @@ export function useAuth() {
     const [loading, setLoading] = useState(true)
 
     const handleSession = async (session) => {
-        console.log("useAuth: handleSession called", { session });
+        // Prevent setting state if the component is unmounted (handled by useEffect cleanup, but good practice)
         if (!session?.user) {
             console.log("useAuth: No session or user found");
             setUser(null)
             setRole(null)
             setLoading(false)
             return
+        }
+
+        // Only fetch role if we have a NEW user or if role is missing
+        if (user?.id === session.user.id && role) {
+            console.log("useAuth: User and role already loaded, skipping fetch.");
+            setLoading(false);
+            return;
         }
 
         console.log("useAuth: User found", session.user.id);
@@ -39,7 +46,7 @@ export function useAuth() {
                     // PGRST116 = no rows returned, which is expected if profile doesn't exist yet
                     console.warn(`useAuth: Error fetching role, attempt ${attempts + 1}/${maxAttempts}:`, error);
                 }
-                
+
                 if (attempts < maxAttempts - 1) {
                     await new Promise(resolve => setTimeout(resolve, 500));
                 }
@@ -65,61 +72,58 @@ export function useAuth() {
     useEffect(() => {
         let mounted = true
         let timeoutId = null
-        let loadingResolved = false
 
-        // Safety timeout: if loading takes more than 10 seconds, force stop loading
+        // Safety timeout: if loading takes more than 5 seconds, force stop loading
         timeoutId = setTimeout(() => {
-            if (mounted && !loadingResolved) {
-                console.warn('useAuth: Loading timeout reached, forcing loading to false')
+            if (mounted) {
+                console.warn('useAuth: Loading timeout reached, forcing loading to false (Safety Valve)')
                 setLoading(false)
-                loadingResolved = true
             }
-        }, 10000)
+        }, 5000)
 
-        // Check active session immediately and restore it
-        const restoreSession = async () => {
+        const initAuth = async () => {
             try {
+                // 1. Check active session immediately
                 const { data: { session }, error } = await supabase.auth.getSession()
-                
+
                 if (error) {
-                    console.error('useAuth: Error getting session:', error)
-                    if (mounted) {
-                        loadingResolved = true
-                        if (timeoutId) clearTimeout(timeoutId)
-                        setUser(null)
-                        setRole(null)
-                        setLoading(false)
-                    }
-                    return
+                    throw error
                 }
 
                 if (mounted) {
-                    loadingResolved = true
-                    if (timeoutId) clearTimeout(timeoutId)
                     await handleSession(session)
                 }
+
             } catch (err) {
-                console.error('useAuth: Exception restoring session:', err)
+                console.error('useAuth: Exception initializing auth:', err)
                 if (mounted) {
-                    loadingResolved = true
-                    if (timeoutId) clearTimeout(timeoutId)
                     setUser(null)
                     setRole(null)
                     setLoading(false)
                 }
+            } finally {
+                if (timeoutId) clearTimeout(timeoutId)
             }
         }
 
-        restoreSession()
+        initAuth()
 
-        // Listen for auth state changes (login, logout, token refresh, etc.)
+        // 2. Listen for auth state changes
         const {
             data: { subscription },
-        } = supabase.auth.onAuthStateChange(async (_event, session) => {
+        } = supabase.auth.onAuthStateChange(async (event, session) => {
+            console.log(`useAuth: Auth state change: ${event}`)
             if (mounted) {
-                loadingResolved = true
-                if (timeoutId) clearTimeout(timeoutId)
-                await handleSession(session)
+                // Optimization: INITIAL_SESSION is already handled by getSession logic usually, but to be safe:
+                if (event === 'INITIAL_SESSION') {
+                    // already handled by initAuth usually, but we can double check
+                } else if (event === 'SIGNED_OUT') {
+                    setUser(null)
+                    setRole(null)
+                    setLoading(false)
+                } else {
+                    await handleSession(session)
+                }
             }
         })
 
