@@ -14,19 +14,30 @@ export const screenService = {
     },
 
     // Pair a screen using a code (Simulated logic for now, real player would generate this)
+    // Pair a screen using a code
     async pairScreen(name, pairingCode) {
         const { data: { user } } = await supabase.auth.getUser()
 
-        // In a real scenario, we'd check if a screen with this pairing code exists and has no owner
-        // For this SaaS Minimum Viable Product, we just creating a screen entry manually
+        // 1. Find the screen with this code
+        const { data: existingScreen, error: searchError } = await supabase
+            .from('screens')
+            .select('id')
+            .eq('pairing_code', pairingCode)
+            .maybeSingle()
+
+        if (searchError) throw searchError
+        if (!existingScreen) throw new Error('Código de pareamento não encontrado.')
+
+        // 2. Update the screen (Claim it)
         const { data, error } = await supabase
             .from('screens')
-            .insert({
+            .update({
                 name,
-                pairing_code: pairingCode,
-                status: 'offline',
-                assigned_to: user.id
+                assigned_to: user.id,
+                status: 'online', // Activate the screen
+                pairing_code: null // Clear code to prevent reuse and satisfy player logic
             })
+            .eq('id', existingScreen.id)
             .select()
             .single()
 
