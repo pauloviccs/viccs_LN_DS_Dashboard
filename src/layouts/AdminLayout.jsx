@@ -1,4 +1,4 @@
-import { Outlet, useNavigate } from 'react-router-dom'
+import { Outlet, useNavigate, NavLink } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { LogOut, LayoutDashboard, Monitor, Users, FolderOpen, Settings, ListVideo } from 'lucide-react'
 import FluidBackground from '../components/ui/FluidBackground'
@@ -34,12 +34,12 @@ const AdminLayout = () => {
                 </div>
 
                 <nav className="flex-1 space-y-2">
-                    <NavItem icon={LayoutDashboard} label="Overview" active />
-                    <NavItem icon={FolderOpen} label="Media Library" />
-                    <NavItem icon={ListVideo} label="Playlists" />
-                    <NavItem icon={Monitor} label="Screens" />
-                    <NavItem icon={Users} label="Clients" />
-                    <NavItem icon={Settings} label="Settings" />
+                    <NavItem icon={LayoutDashboard} label="Overview" to="/admin" />
+                    <NavItem icon={FolderOpen} label="Media Library" to="/admin/media" />
+                    <NavItem icon={ListVideo} label="Playlists" to="/admin/playlists" />
+                    <NavItem icon={Monitor} label="Screens" to="/admin/screens" />
+                    <NavItem icon={Users} label="Clients" to="/admin/clients" />
+                    <NavItem icon={Settings} label="Settings" to="/admin/settings" />
                 </nav>
 
                 <button
@@ -67,11 +67,15 @@ const AdminLayout = () => {
     )
 }
 
-const NavItem = ({ icon: Icon, label, active }) => (
-    <button className={`flex items-center gap-3 w-full p-3 rounded-xl transition-all ${active ? 'bg-white/10 text-white border border-white/20 shadow-lg backdrop-blur-md' : 'hover:bg-white/5 text-white/60 hover:text-white'}`}>
+const NavItem = ({ icon: Icon, label, to }) => (
+    <NavLink
+        to={to}
+        end={to === '/admin'} // Only exact match for root stats
+        className={({ isActive }) => `flex items-center gap-3 w-full p-3 rounded-xl transition-all ${isActive ? 'bg-white/10 text-white border border-white/20 shadow-lg backdrop-blur-md' : 'hover:bg-white/5 text-white/60 hover:text-white'}`}
+    >
         <Icon size={20} />
         <span className="hidden lg:block font-medium">{label}</span>
-    </button>
+    </NavLink>
 )
 
 export default AdminLayout
