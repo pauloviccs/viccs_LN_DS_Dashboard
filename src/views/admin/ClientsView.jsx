@@ -30,7 +30,7 @@ const ClientsView = () => {
     return (
         <div className="space-y-6">
             <div className="flex justify-between items-center">
-                <h2 className="text-2xl font-bold">Client Management</h2>
+                <h2 className="text-2xl font-bold">Gerenciamento de Clientes</h2>
                 <div className="w-64">
                     <GlassInput
                         icon={Search}

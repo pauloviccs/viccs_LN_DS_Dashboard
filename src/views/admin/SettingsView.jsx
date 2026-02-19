@@ -15,7 +15,7 @@ const SettingsView = () => {
             />
 
             <div>
-                <h2 className="text-2xl font-bold mb-4">System Settings</h2>
+                <h2 className="text-2xl font-bold mb-4">Configurações do Sistema</h2>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <SettingSection
                         icon={Globe}
@@ -28,21 +28,6 @@ const SettingsView = () => {
                     <SettingSection icon={Settings} title="Integrations" description="API keys, webhooks, and third-party services." />
                 </div>
             </div>
-
-            <GlassCard className="p-6">
-                <h3 className="text-xl font-bold mb-4">Danger Zone</h3>
-                <p className="text-white/50 text-sm mb-6">
-                    Irreversible actions for system maintenance.
-                </p>
-                <div className="flex gap-4">
-                    <LiquidButton variant="secondary" className="border-red-500/30 text-red-400 hover:bg-red-500/10">
-                        Clear All Cache
-                    </LiquidButton>
-                    <LiquidButton variant="secondary" className="border-red-500/30 text-red-400 hover:bg-red-500/10">
-                        Reset Database Connections
-                    </LiquidButton>
-                </div>
-            </GlassCard>
         </div>
     )
 }

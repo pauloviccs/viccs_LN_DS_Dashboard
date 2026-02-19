@@ -151,15 +151,15 @@ const ScreensView = () => {
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                 <div>
                     <h2 className="text-3xl font-display font-bold text-transparent bg-clip-text bg-gradient-to-r from-white to-white/60">
-                        Screens Management
+                        Gerenciamento de Telas
                     </h2>
-                    <p className="text-white/40 text-sm mt-1">Manage your connected displays and content</p>
+                    <p className="text-white/40 text-sm mt-1">Gerencie seus displays conectados e conteúdos</p>
                 </div>
 
                 <div className="flex items-center gap-4 w-full md:w-auto">
                     <ViewToggle mode={viewMode} setMode={setViewMode} />
                     <LiquidButton onClick={() => setShowPair(true)} className="flex-1 md:flex-none justify-center">
-                        <Plus size={20} /> <span className="ml-2">Pair Screen</span>
+                        <Plus size={20} /> <span className="ml-2">Parear Tela</span>
                     </LiquidButton>
                 </div>
             </div>

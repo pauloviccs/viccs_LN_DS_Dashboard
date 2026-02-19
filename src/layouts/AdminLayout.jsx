@@ -82,8 +82,8 @@ const AdminLayout = () => {
             <main className="flex-1 p-4 lg:p-8 overflow-y-auto relative z-10">
                 <header className="flex justify-between items-center mb-8">
                     <div>
-                        <h1 className="text-3xl font-bold">Admin Console</h1>
-                        <p className="text-white/50">Manage your entire signage network</p>
+                        <h1 className="text-3xl font-bold">Painel de Controle</h1>
+                        <p className="text-white/50">Gerencie toda a sua rede de sinalização digital</p>
                     </div>
 
                     <div className="flex items-center gap-4">
