@@ -7,6 +7,8 @@ export const screenService = {
         const { data, error } = await supabase
             .from('screens')
             .select('*, playlists:playlists!screens_playlist_id_fkey(name)')
+            // Only show screens that have been effectively paired (no pairing_code)
+            .is('pairing_code', null)
             .order('created_at', { ascending: false })
 
         if (error) throw error
