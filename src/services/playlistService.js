@@ -42,7 +42,10 @@ export const playlistService = {
     async updatePlaylistItems(id, items) {
         const { error } = await supabase
             .from('playlists')
-            .update({ items })
+            .update({
+                items,
+                updated_at: new Date().toISOString()
+            })
             .eq('id', id)
 
         if (error) throw error
