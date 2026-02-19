@@ -4,7 +4,9 @@ import { LogOut, LayoutDashboard, Monitor, User } from 'lucide-react'
 import FluidBackground from '../components/ui/FluidBackground'
 import GlassCard from '../components/ui/GlassCard'
 import useStore from '../stores/useStore'
+
 import { supabase } from '../lib/supabase'
+import { useEffect, useState } from 'react'
 
 const ClientLayout = () => {
     const navigate = useNavigate()
@@ -16,6 +18,21 @@ const ClientLayout = () => {
         setRole(null)
         navigate('/login')
     }
+
+    const [profile, setProfile] = useState(null)
+
+    useEffect(() => {
+        const fetchProfile = async () => {
+            if (!user) return
+            const { data } = await supabase
+                .from('profiles')
+                .select('username, avatar_url')
+                .eq('id', user.id)
+                .single()
+            setProfile(data)
+        }
+        fetchProfile()
+    }, [user])
 
     return (
         <div className="flex min-h-screen text-white overflow-hidden bg-black/90">
@@ -52,9 +69,17 @@ const ClientLayout = () => {
                 <header className="flex justify-between items-center mb-8">
                     <div>
                         <h1 className="text-3xl font-bold">Dashboard</h1>
-                        <p className="text-white/50">Welcome back, {user?.email?.split('@')[0]}</p>
+                        <p className="text-white/50">Welcome back, {profile?.username || user?.email?.split('@')[0]}</p>
                     </div>
-                    <div className="w-10 h-10 rounded-full bg-white/10 border border-white/20" />
+                    <div className="w-10 h-10 rounded-full bg-white/10 border border-white/20 overflow-hidden">
+                        {profile?.avatar_url ? (
+                            <img src={profile.avatar_url} alt="Profile" className="w-full h-full object-cover" />
+                        ) : (
+                            <div className="w-full h-full flex items-center justify-center bg-gradient-to-tr from-blue-500 to-purple-500 text-xs font-bold">
+                                {user?.email?.[0].toUpperCase()}
+                            </div>
+                        )}
+                    </div>
                 </header>
 
                 <Outlet />

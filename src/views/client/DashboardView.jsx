@@ -64,16 +64,7 @@ const DashboardView = () => {
             {/* Greeting Section Removed (Handled in Layout) */}
             <div className="flex justify-end gap-4">
                 {/* UUID Display (Blurred) */}
-                <div className="group relative bg-white/5 border border-white/10 rounded-xl px-4 py-2 flex items-center gap-3 transition-all hover:bg-white/10">
-                    <div className="flex flex-col">
-                        <span className="text-[10px] uppercase font-bold text-white/30 tracking-widest">User UUID</span>
-                        <div className="flex items-center gap-2">
-                            <span className="font-mono text-sm text-white/50 blur-[4px] group-hover:blur-none transition-all duration-300 select-all cursor-pointer">
-                                {user?.id}
-                            </span>
-                        </div>
-                    </div>
-                </div>
+
                 <StatCard
                     title="Active Now"
                     value={loading ? '-' : stats.online}
