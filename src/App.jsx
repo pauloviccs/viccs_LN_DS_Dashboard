@@ -12,6 +12,8 @@ import SettingsView from './views/admin/SettingsView'
 import ClientDashboard from './views/client/DashboardView'
 import MyScreensView from './views/client/MyScreensView'
 import ProfileView from './views/client/ProfileView'
+import EditorLayout from './layouts/EditorLayout'
+import EditorDashboard from './views/editor/DashboardView'
 import { useAuth } from './hooks/useAuth'
 import FluidBackground from './components/ui/FluidBackground'
 
@@ -29,7 +31,9 @@ const ProtectedRoute = ({ children, allowedRoles }) => {
 
   if (allowedRoles && !allowedRoles.includes(role)) {
     // Redirect based on role if trying to access unauthorized area
-    return role === 'admin' ? <Navigate to="/admin" /> : <Navigate to="/client" />
+    if (role === 'admin') return <Navigate to="/admin" />
+    if (role === 'editor') return <Navigate to="/editor" />
+    return <Navigate to="/client" />
   }
 
   return children
@@ -54,7 +58,18 @@ function App() {
           <Route path="screens" element={<ScreensView />} />
           <Route path="clients" element={<ClientsView />} />
           <Route path="settings" element={<SettingsView />} />
+          <Route path="settings" element={<SettingsView />} />
           {/* Add other admin routes */}
+        </Route>
+
+        {/* Editor Routes */}
+        <Route path="/editor" element={
+          <ProtectedRoute allowedRoles={['editor', 'admin']}>
+            <EditorLayout />
+          </ProtectedRoute>
+        }>
+          <Route index element={<EditorDashboard />} />
+          <Route path="profile" element={<ProfileView />} />
         </Route>
 
         {/* Client Routes */}
