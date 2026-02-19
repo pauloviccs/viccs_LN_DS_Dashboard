@@ -123,10 +123,11 @@ const ScreensView = () => {
     }
 
     const handleAssignPlaylist = async (screenId, playlistId) => {
+        const normalized = playlistId || null
         try {
             // Optimistic Update
-            setScreens(screens.map(s => s.id === screenId ? { ...s, playlist_id: playlistId } : s))
-            await screenService.assignPlaylist(screenId, playlistId)
+            setScreens(screens.map(s => s.id === screenId ? { ...s, playlist_id: normalized } : s))
+            await screenService.assignPlaylist(screenId, normalized)
             loadData() // Verify
         } catch (error) {
             console.error(error)

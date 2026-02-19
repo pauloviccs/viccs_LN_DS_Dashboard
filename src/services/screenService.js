@@ -46,9 +46,11 @@ export const screenService = {
     },
 
     async assignPlaylist(screenId, playlistId) {
+        const normalizedPlaylistId = playlistId || null
+
         const { error } = await supabase
             .from('screens')
-            .update({ playlist_id: playlistId })
+            .update({ playlist_id: normalizedPlaylistId })
             .eq('id', screenId)
 
         if (error) throw error
