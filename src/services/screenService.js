@@ -6,7 +6,7 @@ export const screenService = {
     async listScreens() {
         const { data, error } = await supabase
             .from('screens')
-            .select('*, playlists(name)')
+            .select('*, playlists:playlists!screens_playlist_id_fkey(name)')
             .order('created_at', { ascending: false })
 
         if (error) throw error

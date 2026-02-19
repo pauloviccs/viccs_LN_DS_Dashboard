@@ -272,10 +272,18 @@ const ScreensView = () => {
                                                 <h3 className="font-bold text-lg text-white mb-1 truncate" title={screen.name}>
                                                     {screen.name}
                                                 </h3>
-                                                <p className="text-xs font-mono text-white/40 mb-6 flex items-center gap-2">
-                                                    <span className="w-1.5 h-1.5 rounded-full bg-white/20" />
-                                                    {screen.pairing_code || 'NO-CODE'}
-                                                </p>
+                                                <div className="text-xs font-mono text-white/40 mb-6 flex items-center gap-2 h-5">
+                                                    {screen.pairing_code ? (
+                                                        <>
+                                                            <span className="w-1.5 h-1.5 rounded-full bg-blue-400 animate-pulse" />
+                                                            {screen.pairing_code}
+                                                        </>
+                                                    ) : (
+                                                        <span className="text-white/20 flex items-center gap-1">
+                                                            <Check size={12} /> Paired
+                                                        </span>
+                                                    )}
+                                                </div>
 
                                                 <div className="mt-auto pt-4 border-t border-white/5 space-y-3">
                                                     <div>
@@ -338,7 +346,7 @@ const ScreensView = () => {
                                                         <StatusBadge status={screen.status} />
                                                     </div>
                                                     <p className="text-xs font-mono text-white/40 mt-0.5">
-                                                        CODE: {screen.pairing_code}
+                                                        {screen.pairing_code ? `CODE: ${screen.pairing_code}` : 'DEVICE PAIRED'}
                                                     </p>
                                                 </div>
 
