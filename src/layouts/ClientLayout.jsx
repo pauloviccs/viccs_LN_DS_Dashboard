@@ -33,9 +33,9 @@ const ClientLayout = () => {
                 </div>
 
                 <nav className="flex-1 space-y-2">
-                    <NavItem icon={LayoutDashboard} label="Dashboard" active />
-                    <NavItem icon={Monitor} label="My Screens" />
-                    <NavItem icon={User} label="Profile" />
+                    <NavItem icon={LayoutDashboard} label="Dashboard" to="/client" />
+                    <NavItem icon={Monitor} label="My Screens" to="/client/screens" />
+                    <NavItem icon={User} label="Profile" to="/client/profile" />
                 </nav>
 
                 <button
@@ -63,11 +63,24 @@ const ClientLayout = () => {
     )
 }
 
-const NavItem = ({ icon: Icon, label, active }) => (
-    <button className={`flex items-center gap-3 w-full p-3 rounded-xl transition-all ${active ? 'bg-blue-600/20 text-blue-400 border border-blue-500/30' : 'hover:bg-white/5 text-white/60 hover:text-white'}`}>
-        <Icon size={20} />
-        <span className="hidden lg:block">{label}</span>
-    </button>
-)
+import { Link, useLocation } from 'react-router-dom'
+
+const NavItem = ({ icon: Icon, label, to }) => {
+    const location = useLocation()
+    // For root path, exact match. For others, startsWith.
+    const active = to === '/client'
+        ? location.pathname === '/client'
+        : location.pathname.startsWith(to)
+
+    return (
+        <Link
+            to={to}
+            className={`flex items-center gap-3 w-full p-3 rounded-xl transition-all ${active ? 'bg-blue-600/20 text-blue-400 border border-blue-500/30' : 'hover:bg-white/5 text-white/60 hover:text-white'}`}
+        >
+            <Icon size={20} />
+            <span className="hidden lg:block">{label}</span>
+        </Link>
+    )
+}
 
 export default ClientLayout
