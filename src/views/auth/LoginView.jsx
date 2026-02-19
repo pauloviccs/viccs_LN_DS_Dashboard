@@ -50,7 +50,7 @@ const LoginView = () => {
             const { error } = await supabase.auth.signInWithOAuth({
                 provider: provider,
                 options: {
-                    redirectTo: `${window.location.origin}/admin` // Adjust based on role logic if needed
+                    redirectTo: window.location.origin + '/admin'
                 }
             })
             if (error) throw error
