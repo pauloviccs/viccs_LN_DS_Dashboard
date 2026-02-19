@@ -2,9 +2,80 @@ import { motion } from 'framer-motion'
 import { Activity, HardDrive, List, Monitor, Plus } from 'lucide-react'
 import GlassCard from '../../components/ui/GlassCard'
 import useStore from '../../stores/useStore'
+import { useState, useEffect } from 'react'
+import { supabase } from '../../lib/supabase'
 
 const EditorDashboard = () => {
     const { user } = useStore()
+    const [loading, setLoading] = useState(true)
+    const [stats, setStats] = useState({
+        activeScreens: 0,
+        totalScreens: 0,
+        activePercentage: 0,
+        storageUsed: 0,
+        storagePercentage: 0,
+        totalPlaylists: 0,
+        totalDevices: 0
+    })
+    const [recentScreens, setRecentScreens] = useState([])
+
+    useEffect(() => {
+        const fetchDashboardData = async () => {
+            try {
+                setLoading(true)
+
+                // 1. Fetch Screens (for Active, Total, Recent)
+                const { data: screens, error: screensError } = await supabase
+                    .from('screens')
+                    .select('*')
+                    .order('last_seen', { ascending: false })
+
+                if (screensError) throw screensError
+
+                const totalScreens = screens.length
+                const activeScreens = screens.filter(s => s.status === 'online').length
+                const activePercentage = totalScreens > 0 ? Math.round((activeScreens / totalScreens) * 100) : 0
+
+                // 2. Fetch Media (for Storage)
+                const { data: mediaFiles, error: mediaError } = await supabase
+                    .from('media')
+                    .select('size')
+
+                if (mediaError) throw mediaError
+
+                const totalBytes = mediaFiles.reduce((acc, file) => acc + (file.size || 0), 0)
+                const storageUsedGB = (totalBytes / (1024 * 1024 * 1024)).toFixed(1)
+                const maxStorageGB = 5 // Mock limit for now
+                const storagePercentage = Math.min(Math.round((storageUsedGB / maxStorageGB) * 100), 100)
+
+                // 3. Fetch Playlists (Count)
+                const { count: playlistsCount, error: playlistsError } = await supabase
+                    .from('playlists')
+                    .select('*', { count: 'exact', head: true })
+
+                if (playlistsError) throw playlistsError
+
+                setStats({
+                    activeScreens,
+                    totalScreens,
+                    activePercentage,
+                    storageUsed: storageUsedGB,
+                    storagePercentage,
+                    totalPlaylists: playlistsCount || 0,
+                    totalDevices: totalScreens // Assuming devices = screens for now
+                })
+
+                setRecentScreens(screens.slice(0, 5))
+
+            } catch (error) {
+                console.error('Error fetching editor dashboard data:', error)
+            } finally {
+                setLoading(false)
+            }
+        }
+
+        fetchDashboardData()
+    }, [])
 
     return (
         <div className="space-y-6 animate-fade-in max-w-[1600px] mx-auto">
@@ -26,34 +97,34 @@ const EditorDashboard = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                 <StatCard
                     title="Telas Ativas"
-                    value="3"
-                    subtext="100% Online"
+                    value={loading ? '-' : stats.activeScreens}
+                    subtext={`${loading ? '-' : stats.activePercentage}% Online`}
                     icon={Monitor}
                     accentColor="text-green-400"
-                    progress={100}
+                    progress={loading ? 0 : stats.activePercentage}
                     progressColor="bg-green-500"
                 />
                 <StatCard
                     title="Armazenamento"
-                    value="861.0 GB"
-                    subtext="93% Utilizado"
+                    value={loading ? '-' : `${stats.storageUsed} GB`}
+                    subtext={`${loading ? '-' : stats.storagePercentage}% Utilizado`}
                     icon={HardDrive}
                     accentColor="text-purple-400"
-                    progress={93}
+                    progress={loading ? 0 : stats.storagePercentage}
                     progressColor="bg-purple-500"
                 />
                 <StatCard
                     title="Playlists"
-                    value="3"
+                    value={loading ? '-' : stats.totalPlaylists}
                     subtext="Prontas para uso"
                     icon={List}
                     accentColor="text-yellow-400"
-                    progress={60}
+                    progress={60} // Fixed progress for now or calculate based on target
                     progressColor="bg-yellow-500"
                 />
                 <StatCard
                     title="Dispositivos Totais"
-                    value="3"
+                    value={loading ? '-' : stats.totalDevices}
                     subtext="Cadastrados na rede"
                     icon={Activity}
                     accentColor="text-blue-400"
@@ -105,24 +176,26 @@ const EditorDashboard = () => {
                         <button className="text-xs text-lumen-accent hover:text-white transition-colors">Ver todas</button>
                     </div>
                     <div className="space-y-4">
-                        {[
-                            { name: 'Olimpo - Crisópolis', status: 'online', playlist: 'Nenhuma', ip: 'Unknown' },
-                            { name: 'LG webOS', status: 'online', playlist: 'Campanha Natal', ip: '192.168.1.45' },
-                            { name: 'Chrome Player', status: 'online', playlist: 'Menu Digital', ip: '10.0.0.12' },
-                        ].map((screen, i) => (
-                            <div key={i} className="flex items-center justify-between p-4 bg-white/5 rounded-xl hover:bg-white/10 transition-colors group cursor-pointer border border-transparent hover:border-white/5">
-                                <div className="flex items-center gap-4">
-                                    <div className={`w-2 h-2 rounded-full ${screen.status === 'online' ? 'bg-green-500 shadow-[0_0_10px_rgba(34,197,94,0.5)]' : 'bg-red-500'}`} />
-                                    <div>
-                                        <h4 className="font-bold text-white text-sm">{screen.name}</h4>
-                                        <p className="text-white/30 text-xs">IP: {screen.ip}</p>
+                        {loading ? (
+                            <div className="text-white/30 text-center py-4">Carregando telas...</div>
+                        ) : recentScreens.length === 0 ? (
+                            <div className="text-white/30 text-center py-4">Nenhuma tela encontrada.</div>
+                        ) : (
+                            recentScreens.map((screen) => (
+                                <div key={screen.id} className="flex items-center justify-between p-4 bg-white/5 rounded-xl hover:bg-white/10 transition-colors group cursor-pointer border border-transparent hover:border-white/5">
+                                    <div className="flex items-center gap-4">
+                                        <div className={`w-2 h-2 rounded-full ${screen.status === 'online' ? 'bg-green-500 shadow-[0_0_10px_rgba(34,197,94,0.5)]' : 'bg-red-500'}`} />
+                                        <div>
+                                            <h4 className="font-bold text-white text-sm">{screen.name}</h4>
+                                            <p className="text-white/30 text-xs">Código: {screen.pairing_code}</p>
+                                        </div>
+                                    </div>
+                                    <div className="text-right">
+                                        <p className="text-white/60 text-xs">Atualizado: <span className="text-white">{new Date(screen.last_seen || screen.created_at).toLocaleTimeString()}</span></p>
                                     </div>
                                 </div>
-                                <div className="text-right">
-                                    <p className="text-white/60 text-xs">Playlist: <span className="text-white">{screen.playlist}</span></p>
-                                </div>
-                            </div>
-                        ))}
+                            ))
+                        )}
                     </div>
                 </GlassCard>
 
