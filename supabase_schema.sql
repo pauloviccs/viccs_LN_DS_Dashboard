@@ -2,6 +2,8 @@
 create table public.profiles (
   id uuid not null references auth.users on delete cascade,
   email text,
+  avatar_url text,
+  phone text,
   role text check (role in ('admin', 'client')) default 'client',
   created_at timestamptz default now(),
   primary key (id)
@@ -101,16 +103,35 @@ create trigger on_auth_user_created
   for each row execute procedure public.handle_new_user();
 
 -- 8. Storage Buckets (Execute in SQL Editor or Dashboard)
-insert into storage.buckets (id, name, public) values ('media', 'media', true);
+insert into storage.buckets (id, name, public) values ('media', 'media', true)
+on conflict (id) do nothing;
 
-create policy "Public Access"
+insert into storage.buckets (id, name, public) values ('avatars', 'avatars', true)
+on conflict (id) do nothing;
+
+-- Media Policies
+create policy "Public Access Media"
   on storage.objects for select
   using ( bucket_id = 'media' );
 
-create policy "Admin Upload"
+create policy "Admin Upload Media"
   on storage.objects for insert
   with check ( bucket_id = 'media' and exists ( select 1 from profiles where id = auth.uid() and role = 'admin' ) );
 
-create policy "Admin Delete"
+create policy "Admin Delete Media"
   on storage.objects for delete
   using ( bucket_id = 'media' and exists ( select 1 from profiles where id = auth.uid() and role = 'admin' ) );
+
+-- Avatars Policies
+create policy "Public Access Avatars"
+  on storage.objects for select
+  using ( bucket_id = 'avatars' );
+
+create policy "User Upload Avatar"
+  on storage.objects for insert
+  with check ( bucket_id = 'avatars' and auth.uid()::text = (storage.foldername(name))[1] );
+
+create policy "User Update Avatar"
+  on storage.objects for update
+  using ( bucket_id = 'avatars' and auth.uid()::text = (storage.foldername(name))[1] );
+
