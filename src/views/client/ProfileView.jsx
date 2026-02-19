@@ -20,6 +20,9 @@ const ProfileView = () => {
 
     // Form Stats
     const [phone, setPhone] = useState(user?.user_metadata?.phone || '')
+    const [username, setUsername] = useState('')
+    const [isEditingUsername, setIsEditingUsername] = useState(false)
+    const [newUsername, setNewUsername] = useState('')
     const [passwordData, setPasswordData] = useState({ current: '', new: '' })
 
     // Cropper State
@@ -35,6 +38,23 @@ const ProfileView = () => {
         setCopied(true)
         setTimeout(() => setCopied(false), 2000)
     }
+
+    // --- Fetch Username on Mount ---
+    useEffect(() => {
+        const fetchUsername = async () => {
+            if (!user) return
+            const { data, error } = await supabase
+                .from('profiles')
+                .select('username')
+                .eq('id', user.id)
+                .single()
+
+            if (data?.username) {
+                setUsername(data.username)
+            }
+        }
+        fetchUsername()
+    }, [user])
 
     // --- Avatar Logic ---
     const onFileChange = async (e) => {
@@ -113,6 +133,31 @@ const ProfileView = () => {
                 await supabase.auth.updateUser({ data: { phone } })
             }
 
+            // Change Username logic
+            if (isEditingUsername && newUsername !== username) {
+                if (newUsername.length < 3) throw new Error("Username must be at least 3 characters")
+
+                // Check for duplicates
+                const { data: existingUser, error: checkError } = await supabase
+                    .from('profiles')
+                    .select('id')
+                    .eq('username', newUsername)
+                    .neq('id', user.id)
+                    .single()
+
+                if (existingUser) throw new Error("Username already taken")
+
+                const { error: updateError } = await supabase
+                    .from('profiles')
+                    .update({ username: newUsername })
+                    .eq('id', user.id)
+
+                if (updateError) throw updateError
+
+                setUsername(newUsername)
+                setIsEditingUsername(false)
+            }
+
             // Change Password
             if (passwordData.new) {
                 if (!passwordData.current) return alert('Current password required to set a new one.')
@@ -173,7 +218,51 @@ const ProfileView = () => {
                     </div>
 
                     <div className="text-center md:text-left flex-1">
-                        <h2 className="text-3xl font-bold text-white mb-2">{user?.email?.split('@')[0]}</h2>
+                        {!isEditingUsername ? (
+                            <div className="flex items-center justify-center md:justify-start gap-3 mb-2 group/edit">
+                                <h2 className="text-3xl font-bold text-white">
+                                    {username || user?.email?.split('@')[0]}
+                                </h2>
+                                <button
+                                    onClick={() => {
+                                        setNewUsername(username || user?.email?.split('@')[0])
+                                        setIsEditingUsername(true)
+                                    }}
+                                    className="opacity-0 group-hover/edit:opacity-100 transition-opacity p-1.5 hover:bg-white/10 rounded-lg text-white/50 hover:text-white"
+                                    title="Edit Username"
+                                >
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z" /><path d="m15 5 4 4" /></svg>
+                                </button>
+                            </div>
+                        ) : (
+                            <div className="flex items-center justify-center md:justify-start gap-2 mb-2">
+                                <input
+                                    type="text"
+                                    value={newUsername}
+                                    onChange={(e) => setNewUsername(e.target.value)}
+                                    className="bg-black/20 border border-lumen-accent/50 text-white text-3xl font-bold rounded-lg px-2 py-1 w-full max-w-[300px] focus:outline-none focus:ring-2 focus:ring-lumen-accent/50"
+                                    autoFocus
+                                />
+                                <div className="flex flex-col gap-1">
+                                    <button
+                                        onClick={handleUpdateProfile} // Triggers form submit or independent save if needed. Since it's inside form, might trigger submit. Ideally separate.
+                                        className="p-1 bg-green-500/20 text-green-400 rounded hover:bg-green-500/30"
+                                        title="Save"
+                                        type="button" // Prevent form submit if handled separately, but handleUpdateProfile handles specific events. Let's make it explicitly check isEditing.
+                                    >
+                                        <Check size={16} />
+                                    </button>
+                                    <button
+                                        onClick={() => setIsEditingUsername(false)}
+                                        className="p-1 bg-red-500/20 text-red-400 rounded hover:bg-red-500/30"
+                                        title="Cancel"
+                                        type="button"
+                                    >
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18" /><path d="m6 6 18 12" /></svg>
+                                    </button>
+                                </div>
+                            </div>
+                        )}
                         <div className="flex flex-wrap justify-center md:justify-start gap-2 mb-4">
                             <span className="px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-lumen-accent/20 text-lumen-accent border border-lumen-accent/20 pointer-events-none">
                                 {role} Account
